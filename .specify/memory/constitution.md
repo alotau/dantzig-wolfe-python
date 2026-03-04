@@ -1,7 +1,8 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.0.0 → 2.0.0 (MAJOR: mandatory input-format compatibility constraint removed from Principle II)
+Version change: 2.0.0 → 2.0.1 (PATCH: corrected Principle II protocol line — "stdout" changed to "designated output file (not stdout)" to match FR-005 and all Gherkin scenarios)
+Previous: 1.0.0 → 2.0.0 (MAJOR: mandatory input-format compatibility constraint removed from Principle II)
 Modified principles:
   - II. CLI Interface — removed requirement to support original C solver input formats;
     original test files/expected outputs are now a guide, not a format mandate.
@@ -35,8 +36,7 @@ Every capability exposed by the library MUST also be reachable via a standalone
 command-line interface (`dwsolver` entry point). The CLI is a first-class artifact,
 not an afterthought.
 
-Protocol: problem files and options via arguments/stdin → solution output to stdout
-→ errors and diagnostics to stderr. Input formats are NOT required to be
+Protocol: problem files and options via arguments/stdin → solution output to the designated output file (not stdout) → errors and diagnostics to stderr. Input formats are NOT required to be
 compatible with the original C solver. Modern, well-structured formats (e.g., JSON,
 TOML, or a purpose-designed schema) are preferred where they better serve usability
 and tooling. The original C solver's example input files and expected outputs MUST
@@ -140,4 +140,4 @@ document prevails.
 **Compliance review**: Every PR reviewer MUST check compliance with this
 constitution. Non-compliance blocks merge, same as a failing test.
 
-**Version**: 2.0.0 | **Ratified**: 2026-03-03 | **Last Amended**: 2026-03-03
+**Version**: 2.0.1 | **Ratified**: 2026-03-03 | **Last Amended**: 2026-03-03
