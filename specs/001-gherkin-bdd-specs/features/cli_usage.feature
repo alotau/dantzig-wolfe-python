@@ -69,6 +69,13 @@ Feature: Command Line Interface — Dantzig-Wolfe Solver
     Then the exit code is non-zero
     And an error message is written to stderr mentioning the missing file
 
+  Scenario: Error on unwritable output path
+    Given a valid block-angular LP input file "simple_two_block.json"
+    When I run "dwsolver solve simple_two_block.json --output /nonexistent_dir/out.json"
+    Then the exit code is non-zero
+    And an error message is written to stderr
+    And no solution file is created
+
   # ---------------------------------------------------------------------------
   # Worker count parameter
   # ---------------------------------------------------------------------------

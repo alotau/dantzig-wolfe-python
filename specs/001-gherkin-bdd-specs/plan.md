@@ -56,7 +56,7 @@ Gherkin feature files that run as part of the CI gate.
 | I | Library-First | `solve()` / `Problem` / `Result` / `DWSolverInputError` form the complete library surface; CLI is a thin `click` wrapper with no logic | ✅ PASS |
 | II | CLI Interface | `library_api.md` and `cli_api.md` confirm all capabilities (`--workers`, `--tolerance`, `--output`) are CLI-accessible | ✅ PASS |
 | III | Test-First | All contracts written before implementation; data-model defines validation rules that BDD steps will assert against | ✅ PASS |
-| IV | Massively Parallel | `dispatch_subproblems()` in `subproblem.py` uses futures-collect pattern; pool capped at `cpu_count * 2`; no sequential hot path in any contract | ✅ PASS |
+| IV | Massively Parallel | `dispatch_subproblems()` in `subproblem.py` uses futures-collect pattern; pool size is `min(workers or cpu_count()*2, len(blocks))`; no sequential hot path in any contract | ✅ PASS |
 | V | Numerical Correctness | `DEFAULT_TOLERANCE: float = 1e-6` declared in `models.py`; `json_schema.md` and `data-model.md` explicitly reference it; `Result.tolerance` echoes the value used | ✅ PASS |
 
 **Post-design review: No new violations. All gates hold.**

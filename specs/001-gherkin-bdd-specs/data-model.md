@@ -150,7 +150,7 @@ class Problem(BaseModel):
 **Validation rules**:
 - `len(blocks) >= 1`
 - All `block_id` values are unique
-- All `constraint_indices` in `LinkingColumns` are valid indices into `master.constraint_names`
+- All `rows[k]` in `LinkingColumns` are valid indices into `master.constraint_names`; all `cols[k]` are valid indices into the block's `variable_names`
 - `schema_version` major must be `"1"`; otherwise `DWSolverInputError` is raised
 
 **State transitions**: `Problem` is **read-only** after construction (Pydantic frozen config). No mutation occurs during solve; each call to `solve()` treats the problem as immutable input.

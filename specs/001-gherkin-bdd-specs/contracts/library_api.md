@@ -40,7 +40,7 @@ def solve(
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `problem` | `Problem` | required | Validated problem instance |
-| `workers` | `int \| None` | `None` | Number of parallel workers; `None` → `os.cpu_count()` |
+| `workers` | `int \| None` | `None` | Number of parallel workers; `None` → `os.cpu_count() * 2` at runtime (HiGHS releases the GIL; 2× gives CPU + I/O overlap) |
 | `tolerance` | `float` | `1e-6` | DW convergence tolerance (reduced cost threshold) |
 | `max_iterations` | `int` | `1000` | Maximum DW iterations before returning `iteration_limit` |
 
