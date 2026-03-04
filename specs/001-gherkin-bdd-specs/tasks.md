@@ -77,7 +77,8 @@ the known objective value; exit code is 0.
 - [ ] T019 [US1] Implement `src/dwsolver/cli.py` — `@click.command()` with `PROBLEM_FILE` positional arg, `--output`, `--workers`, `--tolerance`; call `Problem.from_file()` then `solve()`; write `Result` as JSON to output path (default `<input>.solution.json`); all errors to stderr; exit 0 for valid solver outcomes, exit 1 for tool failures
 - [ ] T020 [US1] Export `solve` in `src/dwsolver/__init__.py` — wire up imports from `models.py` and `solver.py` so `from dwsolver import solve, Problem, Result, SolveStatus, DWSolverInputError` works
 - [ ] T021 [US1] Implement BDD steps for `features/cli_usage.feature` scenarios 1–3 ("Solve a valid problem", "Explicit output path", "Variable assignments in output") in `tests/bdd/steps/test_cli_usage.py` using `click.testing.CliRunner`
-- [ ] T022 [P] [US1] Write `tests/unit/test_solver.py` — unit tests for `dispatch_subproblems` (mock `solve_subproblem`), Phase I artificial variable injection, Phase II column generation loop termination, `workers=1` vs `workers=N` produce identical results
+- [ ] T022 [P] [US1] Write `tests/unit/test_solver.py` — unit tests for `dispatch_subproblems` (mock `solve_subproblem`), Phase I artificial variable injection, Phase II column generation loop termination, `workers=1` vs `workers=N` produce identical results, and degenerate pricing step (all subproblems return no improving columns — mock `SubproblemResult` with reduced cost ≥ 0 for all blocks — assert solver terminates with `status == "optimal"` rather than cycling)
+- [ ] T043 [P] [US1] Add single-block edge-case test to `tests/unit/test_solver.py` — construct a `Problem` with exactly 1 block (degenerate decomposition); assert `solve()` returns `status == "optimal"` with correct objective and `variable_values`; assert pool size resolves to `min(resolved_workers, 1)` (i.e., the `len(blocks)` cap applies)
 - [ ] T023 [P] [US1] Write `tests/unit/test_subproblem.py` — unit tests for `solve_subproblem`: verify modified objective construction (`c_i - π' D_i`), optimal result extraction, infeasible/unbounded status passthrough, `high.setOptionValue("solver", "simplex")` is called
 
 **Checkpoint**: `dwsolver tests/fixtures/simple_two_block.json` produces correct solution file; all US1 BDD scenarios pass; exit code 0.
@@ -208,7 +209,7 @@ All tasks follow `- [ ] T### [P?] [US?] Description with file path`.
 | `[US#]` present on all Phase 3–6 tasks | ✅ |
 | Setup/Foundation/Polish phases have no `[US#]` label | ✅ |
 | Every task includes an explicit file path | ✅ |
-| Total tasks | **42** |
+| Total tasks | **43** |
 
 ### Task count by user story
 
@@ -216,7 +217,7 @@ All tasks follow `- [ ] T### [P?] [US?] Description with file path`.
 |-------|-------|-------|
 | Phase 1 | Setup | T001–T011, T042 (12) |
 | Phase 2 | Foundation | T012–T015 (4) |
-| Phase 3 | US1 (CLI solve) | T016–T023 (8) |
+| Phase 3 | US1 (CLI solve) | T016–T023, T043 (9) |
 | Phase 4 | US2 (CLI errors) | T024–T028 (5) |
 | Phase 5 | US3 (Library API) | T029–T033 (5) |
 | Phase 6 | US4 (Library errors) | T034–T036 (3) |

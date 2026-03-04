@@ -361,15 +361,16 @@ dev = ["pytest", "pytest-bdd", "ruff", "mypy", "highspy"]
         "senses": ["=", "<="]
       },
       "linking_columns": {
-        "constraint_indices": [0, 1],
-        "coefficients": [1.0, 0.5]
+        "rows": [0, 1],
+        "cols": [0, 1],
+        "values": [1.0, 0.5]
       }
     }
   ]
 }
 ```
 
-**`linking_columns`** maps block variables into the master's linking constraints — this is the `D_i` matrix in sparse form. `constraint_indices` references rows of `master.constraint_names`.
+**`linking_columns`** maps block variables into the master's linking constraints — this is the `D_i` matrix in COO sparse form (`D_i[rows[k], cols[k]] = values[k]`). `rows[k]` references a row of `master.constraint_names`; `cols[k]` references a variable index within this block's `variable_names`.
 
 **Schema evolution strategy:**
 ```python
