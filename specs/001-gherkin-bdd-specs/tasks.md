@@ -26,8 +26,17 @@ by all subsequent phases.
 - [ ] T007 Create `.github/workflows/ci.yml` — steps: `pip install -e ".[dev]"` → `ruff check` → `ruff format --check` → `mypy src/` → `pytest tests/unit/` → `pytest tests/bdd/`
 - [ ] T008 [P] Create `tests/unit/__init__.py`, `tests/bdd/__init__.py`, `tests/bdd/steps/__init__.py` (empty init files for test discovery)
 - [ ] T009 [P] Create `tests/fixtures/simple_two_block.json` — minimal 2-block, 1-linking-constraint LP with known optimal value (used by SC-001 and all BDD CLI scenarios)
-- [ ] T010 [P] Create `tests/fixtures/infeasible.json` — infeasible block-angular LP (empty feasible region)
-- [ ] T011 [P] Create `tests/fixtures/unbounded.json` — unbounded block-angular LP (no upper bound on objective)
+- [ ] T010 [P] Create `tests/fixtures/infeasible_problem.json` — infeasible block-angular LP (empty feasible region)
+- [ ] T011 [P] Create `tests/fixtures/unbounded_problem.json` — unbounded block-angular LP (no upper bound on objective)
+- [ ] T042 [P] Create reference fixtures from `alotau/dwsolver` C solver examples — translate all 6 CPLEX LP problems into Python solver JSON (schema_version `"1.0"`) for SC-001 regression coverage. Source repo: `https://github.com/alotau/dwsolver/tree/master/examples`. Files to create:
+  - `tests/fixtures/ref_book_bertsimas.json` — Bertsimas & Tsitsiklis *Introduction to Linear Optimization* example 6.2 (p.245–246); 1-subproblem decomposition (use default `guidefile`); known solution: x1=2.0, x2=1.5, x3=2.0; derive expected objective from objective function evaluated at solution
+  - `tests/fixtures/ref_book_lasdon.json` — Lasdon *Optimization Theory for Large Systems* example 3.5 (p.155–160); known optimal = −110/3 ≈ −36.6667; known solution: x1=8.3333, x2=3.3333, y1=10.0, y2=5.0
+  - `tests/fixtures/ref_book_dantzig.json` — Dantzig & Thapa *Linear Programming: Theory and Extensions* example 10.5/10.6 (p.290–298); multiple optimal bases — variable assignments non-deterministic; record expected objective value only (derive from CPLEX files)
+  - `tests/fixtures/ref_web_mitchell.json` — Mitchell DW decomposition example (rpi.edu); known optimal = −5; known solution: x1=0.0, x2=1.0, x3=2.0
+  - `tests/fixtures/ref_web_trick.json` — Trick *A Consultant's Guide to Solving Large Problems* DW example (mat.gsia.cmu.edu); known solution: x1=3.0, x2=2.0, x3=3.0; derive expected objective from objective function evaluated at solution
+  - `tests/fixtures/ref_four_sea.json` — Bertsimas–Stock-Patterson ATM toy problem (8 aircraft, 4 sectors); variable assignments non-deterministic; known expected optimal = 12 (total delay minutes)
+
+  For each fixture, create a companion `tests/fixtures/<name>.expected.json` containing `{"objective": <float>}` (all 6) plus `{"variables": {"<name>": <float>, ...}}` for the 4 deterministic examples (bertsimas, lasdon, mitchell, trick). These companion files are consumed by T039 regression assertions. Translation guide: each CPLEX `Minimize`/`Maximize` section → `master` objective; subproblem variable bounds/domains → `blocks[i].bounds`; linking constraints → `master` rows with `linking_columns` in COO format.
 
 **Checkpoint**: `pip install -e ".[dev]"` succeeds; `ruff check` and `mypy` pass on stubs; CI workflow is parseable.
 
@@ -38,10 +47,12 @@ by all subsequent phases.
 **Purpose**: Core data models and constants that every user story depends on. Must
 be complete and passing mypy/ruff before any story implementation begins.
 
-- [ ] T012 Implement `src/dwsolver/models.py` — all Pydantic v2 models: `SolveStatus`, `Bounds`, `BlockConstraints`, `LinkingColumns`, `Block`, `Master`, `Problem` (with `from_file()` stub), `Result`, `DWSolverInputError`, and constants `DEFAULT_TOLERANCE = 1e-6`, `DEFAULT_WORKERS = None`, `MAX_ITERATIONS = 1000`
-- [ ] T013 Add cross-field Pydantic validators to `src/dwsolver/models.py`: dimension consistency (`len(variable_names) == len(objective) == len(bounds)`), unique `block_id` values, valid `constraint_indices` in `LinkingColumns`, `senses` values ∈ `{"=", "<=", ">="}`, `lower <= upper` in `Bounds`, `schema_version` major == `"1"`
-- [ ] T014 Implement `Problem.from_file()` in `src/dwsolver/models.py` — read JSON from path, call `model_validate`, raise `DWSolverInputError` on `FileNotFoundError`, `JSONDecodeError`, and `ValidationError`
+> ⚠️ **Constitution Principle III (NON-NEGOTIABLE — Test-First)**: T015 MUST be written and confirmed failing **before** T012–T014 implementation begins. The `[P]` marker means T015 may live on a parallel branch; it does not permit writing tests after implementation.
+
 - [ ] T015 [P] Write `tests/unit/test_models.py` — unit tests for all validators (happy path + each error condition), `from_file()` with valid/missing/malformed files, `SolveStatus` string values, `Result` field constraints per status
+- [ ] T012 Implement `src/dwsolver/models.py` — all Pydantic v2 models: `SolveStatus`, `Bounds`, `BlockConstraints`, `LinkingColumns`, `Block`, `Master`, `Problem` (with `from_file()` stub), `Result`, `DWSolverInputError`, and constants `DEFAULT_TOLERANCE = 1e-6`, `DEFAULT_WORKERS = None`, `MAX_ITERATIONS = 1000`
+- [ ] T013 Add cross-field Pydantic validators to `src/dwsolver/models.py`: dimension consistency (`len(variable_names) == len(objective) == len(bounds)`), unique `block_id` values, valid `rows[k]` and `cols[k]` in `LinkingColumns` are valid indices into `master.constraint_names` and the block's `variable_names` respectively, `senses` values ∈ `{"=", "<=", ">="}`, `lower <= upper` in `Bounds`, `schema_version` major == `"1"`
+- [ ] T014 Implement `Problem.from_file()` in `src/dwsolver/models.py` — read JSON from path, call `model_validate`, raise `DWSolverInputError` on `FileNotFoundError`, `JSONDecodeError`, and `ValidationError`
 
 **Checkpoint**: `pytest tests/unit/test_models.py` passes; `mypy src/dwsolver/models.py` passes with strict mode.
 
@@ -55,6 +66,8 @@ file containing the optimal objective value and variable assignments.
 **Independent Test**: Run `dwsolver tests/fixtures/simple_two_block.json`; verify
 `simple_two_block.json.solution.json` is written and `status == "optimal"` with
 the known objective value; exit code is 0.
+
+> ⚠️ **Constitution Principle III (NON-NEGOTIABLE — Test-First)**: T022 and T023 MUST be written and confirmed failing **before** T016–T019 implementation begins. The `[P]` marker permits parallel branches; it does not permit writing tests after implementation.
 
 ### Implementation
 
@@ -76,7 +89,7 @@ the known objective value; exit code is 0.
 **Goal**: Infeasible, unbounded, and malformed inputs each produce a structured,
 informative response; no crashes; correct exit codes.
 
-**Independent Test**: Run `dwsolver tests/fixtures/infeasible.json`; verify output
+**Independent Test**: Run `dwsolver tests/fixtures/infeasible_problem.json`; verify output
 `status == "infeasible"`, `variable_values == {}`, `objective == null`, exit code 0.
 Run `dwsolver missing.json`; verify error on stderr, exit code 1.
 
@@ -84,9 +97,9 @@ Run `dwsolver missing.json`; verify error on stderr, exit code 1.
 
 - [ ] T024 [US2] Implement BDD steps for `features/cli_usage.feature` — infeasible scenario ("Output indicates infeasible") in `tests/bdd/steps/test_cli_usage.py` — assert on output JSON `status`, empty `variable_values`, null `objective`, exit code 0
 - [ ] T025 [US2] Implement BDD steps for `features/cli_usage.feature` — unbounded scenario ("Output indicates unbounded") in `tests/bdd/steps/test_cli_usage.py` — same assertions for `status == "unbounded"`
-- [ ] T026 [P] [US2] Implement BDD steps for `features/cli_usage.feature` — error handling scenarios ("Malformed input file", "Missing input file", "Error message goes to stderr") in `tests/bdd/steps/test_cli_usage.py` — use `CliRunner`; assert stderr content, non-zero exit, no output file created
-- [ ] T027 [US2] Verify `solver.py` Phase I returns `Result(status=INFEASIBLE)` when artificials cannot be driven to zero — add integration test in `tests/unit/test_solver.py` using `tests/fixtures/infeasible.json`
-- [ ] T028 [P] [US2] Verify `solver.py` returns `Result(status=UNBOUNDED)` when a subproblem is unbounded — add integration test in `tests/unit/test_solver.py` using `tests/fixtures/unbounded.json`
+- [ ] T026 [P] [US2] Implement BDD steps for `features/cli_usage.feature` — error handling scenarios ("Malformed input file", "Missing input file", "Error message goes to stderr", "Unwritable output path") in `tests/bdd/steps/test_cli_usage.py` — use `CliRunner`; assert stderr content, non-zero exit, no output file created
+- [ ] T027 [US2] Verify `solver.py` Phase I returns `Result(status=INFEASIBLE)` when artificials cannot be driven to zero — add integration test in `tests/unit/test_solver.py` using `tests/fixtures/infeasible_problem.json`
+- [ ] T028 [P] [US2] Verify `solver.py` returns `Result(status=UNBOUNDED)` when a subproblem is unbounded — add integration test in `tests/unit/test_solver.py` using `tests/fixtures/unbounded_problem.json`
 
 **Checkpoint**: All US2 BDD scenarios pass; `pytest tests/bdd/` shows 0 failures for cli_usage.feature scenarios 1–7.
 
@@ -125,7 +138,7 @@ arrays; assert `DWSolverInputError` is raised and `str(exc)` identifies the fiel
 
 - [ ] T034 [US4] Implement BDD steps for `features/library_usage.feature` — error handling scenario ("DWSolverInputError raised for invalid input", "Exception importable from top-level") in `tests/bdd/steps/test_library_usage.py` — use `pytest.raises(DWSolverInputError)`, assert message content, assert `from dwsolver import DWSolverInputError` works
 - [ ] T035 [US4] Implement BDD step for `features/library_usage.feature` — `iteration_limit` partial result scenario ("Iteration limit returns best feasible solution") in `tests/bdd/steps/test_library_usage.py` — pass `max_iterations=1`, assert `status == "iteration_limit"`, `variable_values` populated, `objective` is float
-- [ ] T036 [P] [US4] Add remaining `DWSolverInputError` trigger paths to `tests/unit/test_models.py`: unsupported `schema_version`, duplicate `variable_names` across blocks, `lower > upper`, invalid sense string, `constraint_indices` out of range
+- [ ] T036 [P] [US4] Add remaining `DWSolverInputError` trigger paths to `tests/unit/test_models.py`: unsupported `schema_version`, duplicate `variable_names` across blocks, `lower > upper`, invalid sense string, `rows[k]` or `cols[k]` index out of range
 
 **Checkpoint**: All US4 BDD scenarios pass; `pytest tests/unit/` and `pytest tests/bdd/` show 0 failures.
 
@@ -195,13 +208,13 @@ All tasks follow `- [ ] T### [P?] [US?] Description with file path`.
 | `[US#]` present on all Phase 3–6 tasks | ✅ |
 | Setup/Foundation/Polish phases have no `[US#]` label | ✅ |
 | Every task includes an explicit file path | ✅ |
-| Total tasks | **41** |
+| Total tasks | **42** |
 
 ### Task count by user story
 
 | Phase | Story | Tasks |
 |-------|-------|-------|
-| Phase 1 | Setup | T001–T011 (11) |
+| Phase 1 | Setup | T001–T011, T042 (12) |
 | Phase 2 | Foundation | T012–T015 (4) |
 | Phase 3 | US1 (CLI solve) | T016–T023 (8) |
 | Phase 4 | US2 (CLI errors) | T024–T028 (5) |
