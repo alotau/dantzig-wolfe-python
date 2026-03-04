@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "metadata": {
+    "name": "unbounded_problem",
+    "description": "Unbounded LP: minimize -x1-x2 with x1,x2>=0 (no upper bounds) and x1+x2>=1. Objective is -inf."
+  },
+  "master": {
+    "constraint_names": ["Con1"],
+    "rhs": [1.0],
+    "senses": [">="]
+  },
+  "blocks": [
+    {
+      "block_id": "block_0",
+      "variable_names": ["x1"],
+      "objective": [-1.0],
+      "bounds": [{"lower": 0.0, "upper": null}],
+      "constraints": {
+        "matrix": [],
+        "rhs": [],
+        "senses": []
+      },
+      "linking_columns": {
+        "rows": [0],
+        "cols": [0],
+        "values": [1.0]
+      }
+    },
+    {
+      "block_id": "block_1",
+      "variable_names": ["x2"],
+      "objective": [-1.0],
+      "bounds": [{"lower": 0.0, "upper": null}],
+      "constraints": {
+        "matrix": [],
+        "rhs": [],
+        "senses": []
+      },
+      "linking_columns": {
+        "rows": [0],
+        "cols": [0],
+        "values": [1.0]
+      }
+    }
+  ]
+}

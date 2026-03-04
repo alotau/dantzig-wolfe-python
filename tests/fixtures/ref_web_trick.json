@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "metadata": {
+    "name": "ref_web_trick",
+    "description": "Trick 'A Consultant's Guide to Solving Large Problems' DW example (mat.gsia.cmu.edu). 2-block decomposition with 2 master constraints. Known optimal: x1=3.0, x2=2.0, x3=3.0, obj=-40.0."
+  },
+  "master": {
+    "constraint_names": ["Con1", "Con2"],
+    "rhs": [10.0, 3.0],
+    "senses": ["<=", "<="]
+  },
+  "blocks": [
+    {
+      "block_id": "block_0",
+      "variable_names": ["x2", "x3"],
+      "objective": [-5.0, -3.0],
+      "bounds": [
+        {"lower": 0.0, "upper": null},
+        {"lower": 0.0, "upper": null}
+      ],
+      "constraints": {
+        "matrix": [
+          [1.0, 1.0],
+          [2.0, 1.0]
+        ],
+        "rhs": [5.0, 8.0],
+        "senses": ["<=", "<="]
+      },
+      "linking_columns": {
+        "rows": [0, 0],
+        "cols": [0, 1],
+        "values": [2.0, 1.0]
+      }
+    },
+    {
+      "block_id": "block_1",
+      "variable_names": ["x1"],
+      "objective": [-7.0],
+      "bounds": [
+        {"lower": 0.0, "upper": null}
+      ],
+      "constraints": {
+        "matrix": [
+          [1.0]
+        ],
+        "rhs": [3.0],
+        "senses": ["<="]
+      },
+      "linking_columns": {
+        "rows": [0, 1],
+        "cols": [0, 0],
+        "values": [1.0, 1.0]
+      }
+    }
+  ]
+}

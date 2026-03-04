@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "metadata": {
+    "name": "ref_book_dantzig",
+    "description": "Dantzig & Thapa Linear Programming: Theory and Extensions example 10.5/10.6 (p.290-298). 3-block decomposition with 2 master constraints. Variable assignments are non-deterministic (multiple optimal bases); only the objective value is used for regression."
+  },
+  "master": {
+    "constraint_names": ["Con1", "Con2"],
+    "rhs": [64.0, 63.0],
+    "senses": ["=", "="]
+  },
+  "blocks": [
+    {
+      "block_id": "block_0",
+      "variable_names": ["x1", "x2", "x3", "x4", "x5", "x6"],
+      "objective": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+      "bounds": [
+        {"lower": 0.0, "upper": 65.0},
+        {"lower": 0.0, "upper": 65.0},
+        {"lower": 0.0, "upper": 65.0},
+        {"lower": 0.0, "upper": 65.0},
+        {"lower": 0.0, "upper": 65.0},
+        {"lower": 0.0, "upper": 65.0}
+      ],
+      "constraints": {
+        "matrix": [
+          [1.0, 1.0, 1.0, 0.0, 0.0, 0.0],
+          [0.0, 0.0, 0.0, 1.0, 1.0, 1.0],
+          [1.0, 0.0, 0.0, 1.0, 0.0, 0.0],
+          [0.0, 1.0, 0.0, 0.0, 1.0, 0.0],
+          [0.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+        ],
+        "rhs": [3.0, 4.0, 2.0, 1.0, 4.0],
+        "senses": ["=", "=", "=", "=", "="]
+      },
+      "linking_columns": {
+        "rows": [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+        "cols": [0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5],
+        "values": [3.0, 2.0, 1.0, 6.0, 5.0, 4.0, 1.0, 8.0, 3.0, 7.0, 1.0, 4.0]
+      }
+    },
+    {
+      "block_id": "block_1",
+      "variable_names": ["x7", "x8", "x9", "x10", "x11", "x12"],
+      "objective": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+      "bounds": [
+        {"lower": 0.0, "upper": 65.0},
+        {"lower": 0.0, "upper": 65.0},
+        {"lower": 0.0, "upper": 65.0},
+        {"lower": 0.0, "upper": 65.0},
+        {"lower": 0.0, "upper": 65.0},
+        {"lower": 0.0, "upper": 65.0}
+      ],
+      "constraints": {
+        "matrix": [
+          [1.0, 1.0, 1.0, 0.0, 0.0, 0.0],
+          [0.0, 0.0, 0.0, 1.0, 1.0, 1.0],
+          [1.0, 0.0, 0.0, 1.0, 0.0, 0.0],
+          [0.0, 1.0, 0.0, 0.0, 1.0, 0.0],
+          [0.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+        ],
+        "rhs": [4.0, 5.0, 3.0, 3.0, 3.0],
+        "senses": ["=", "=", "=", "=", "="]
+      },
+      "linking_columns": {
+        "rows": [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+        "cols": [0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5],
+        "values": [8.0, 5.0, 7.0, 3.0, 4.0, 1.0, 5.0, 2.0, 5.0, 3.0, 2.0, 6.0]
+      }
+    },
+    {
+      "block_id": "block_2",
+      "variable_names": ["x13", "x14"],
+      "objective": [7.0, -10.0],
+      "bounds": [
+        {"lower": 0.0, "upper": 65.0},
+        {"lower": 0.0, "upper": 65.0}
+      ],
+      "constraints": {
+        "matrix": [
+          [1.0, -1.0]
+        ],
+        "rhs": [1.0],
+        "senses": ["="]
+      },
+      "linking_columns": {
+        "rows": [0, 0, 1, 1],
+        "cols": [0, 1, 0, 1],
+        "values": [1.0, 2.0, 3.0, 4.0]
+      }
+    }
+  ]
+}

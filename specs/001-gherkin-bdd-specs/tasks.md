@@ -17,19 +17,19 @@
 **Purpose**: Project scaffolding, toolchain, CI skeleton, and example fixtures used
 by all subsequent phases.
 
-- [ ] T001 Create `pyproject.toml` with hatchling build, `[project.scripts] dwsolver = "dwsolver.cli:main"`, and `[project.optional-dependencies] dev = [pytest, pytest-bdd, ruff, mypy, highspy]` in repo root
-- [ ] T002 Create `src/dwsolver/__init__.py` with empty public API stubs (exports `solve`, `Problem`, `Result`, `SolveStatus`, `DWSolverInputError`)
-- [ ] T003 [P] Create `src/dwsolver/py.typed` (empty PEP 561 marker file)
-- [ ] T004 [P] Configure `ruff` in `pyproject.toml` — lint + format, target Python 3.11
-- [ ] T005 [P] Configure `mypy` strict mode in `pyproject.toml`
-- [ ] T006 [P] Configure `pytest` and `pytest-bdd` in `pyproject.toml` — set `bdd_features_base_dir = "specs/001-gherkin-bdd-specs/features"`
-- [ ] T007 Create `.github/workflows/ci.yml` — steps: `pip install -e ".[dev]"` → `ruff check` → `ruff format --check` → `mypy src/` → `pytest tests/unit/` → `pytest tests/bdd/`
-- [ ] T008 [P] Create `tests/unit/__init__.py`, `tests/bdd/__init__.py`, `tests/bdd/steps/__init__.py` (empty init files for test discovery)
-- [ ] T009 [P] Create `tests/fixtures/simple_two_block.json` — minimal 2-block, 1-linking-constraint LP with known optimal value (used by SC-001 and all BDD CLI scenarios)
-- [ ] T010 [P] Create `tests/fixtures/infeasible_problem.json` — infeasible block-angular LP (empty feasible region)
-- [ ] T011 [P] Create `tests/fixtures/unbounded_problem.json` — unbounded block-angular LP (no upper bound on objective)
-- [ ] T044 [P] Create `tests/bdd/conftest.py` — shared `CliRunner` fixture and `tmp_path`-scoped output directory fixture used by all BDD step files; configure `bdd_features_base_dir` if not already set via `pyproject.toml`
-- [ ] T042 [P] Create reference fixtures from `alotau/dwsolver` C solver examples — translate all 6 CPLEX LP problems into Python solver JSON (schema_version `"1.0"`) for SC-001 regression coverage. Source repo: `https://github.com/alotau/dwsolver/tree/master/examples`. Files to create:
+- [X] T001 Create `pyproject.toml` with hatchling build, `[project.scripts] dwsolver = "dwsolver.cli:main"`, and `[project.optional-dependencies] dev = [pytest, pytest-bdd, ruff, mypy, highspy]` in repo root
+- [X] T002 Create `src/dwsolver/__init__.py` with empty public API stubs (exports `solve`, `Problem`, `Result`, `SolveStatus`, `DWSolverInputError`)
+- [X] T003 [P] Create `src/dwsolver/py.typed` (empty PEP 561 marker file)
+- [X] T004 [P] Configure `ruff` in `pyproject.toml` — lint + format, target Python 3.11
+- [X] T005 [P] Configure `mypy` strict mode in `pyproject.toml`
+- [X] T006 [P] Configure `pytest` and `pytest-bdd` in `pyproject.toml` — set `bdd_features_base_dir = "specs/001-gherkin-bdd-specs/features"`
+- [X] T007 Create `.github/workflows/ci.yml` — steps: `pip install -e ".[dev]"` → `ruff check` → `ruff format --check` → `mypy src/` → `pytest tests/unit/` → `pytest tests/bdd/`
+- [X] T008 [P] Create `tests/unit/__init__.py`, `tests/bdd/__init__.py`, `tests/bdd/steps/__init__.py` (empty init files for test discovery)
+- [X] T009 [P] Create `tests/fixtures/simple_two_block.json` — minimal 2-block, 1-linking-constraint LP with known optimal value (used by SC-001 and all BDD CLI scenarios)
+- [X] T010 [P] Create `tests/fixtures/infeasible_problem.json` — infeasible block-angular LP (empty feasible region)
+- [X] T011 [P] Create `tests/fixtures/unbounded_problem.json` — unbounded block-angular LP (no upper bound on objective)
+- [X] T044 [P] Create `tests/bdd/conftest.py` — shared `CliRunner` fixture and `tmp_path`-scoped output directory fixture used by all BDD step files; configure `bdd_features_base_dir` if not already set via `pyproject.toml`
+- [X] T042 [P] Create reference fixtures from `alotau/dwsolver` C solver examples — translate all 6 CPLEX LP problems into Python solver JSON (schema_version `"1.0"`) for SC-001 regression coverage. Source repo: `https://github.com/alotau/dwsolver/tree/master/examples`. Files to create:
   - `tests/fixtures/ref_book_bertsimas.json` — Bertsimas & Tsitsiklis *Introduction to Linear Optimization* example 6.2 (p.245–246); 1-subproblem decomposition (use default `guidefile`); known solution: x1=2.0, x2=1.5, x3=2.0; derive expected objective from objective function evaluated at solution
   - `tests/fixtures/ref_book_lasdon.json` — Lasdon *Optimization Theory for Large Systems* example 3.5 (p.155–160); known optimal = −110/3 ≈ −36.6667; known solution: x1=8.3333, x2=3.3333, y1=10.0, y2=5.0
   - `tests/fixtures/ref_book_dantzig.json` — Dantzig & Thapa *Linear Programming: Theory and Extensions* example 10.5/10.6 (p.290–298); multiple optimal bases — variable assignments non-deterministic; record expected objective value only (derive from CPLEX files)

@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "metadata": {
+    "name": "ref_four_sea",
+    "description": "Bertsimas-Stock-Patterson ATM toy problem: 8 aircraft (AC0..AC7) over 4 air traffic sectors (SEA region). 4-block decomposition (one block per aircraft pair). Known optimal: 12 total delay minutes. TODO: replace placeholder blocks below with full LP encoding from alotau/dwsolver C solver examples/four_sea/ (master.cplex + subprob_1..4.cplex).",
+    "status": "placeholder — full LP encoding required before regression use"
+  },
+  "master": {
+    "constraint_names": ["sector_capacity_placeholder"],
+    "rhs": [1.0],
+    "senses": ["<="]
+  },
+  "blocks": [
+    {
+      "block_id": "block_0_placeholder",
+      "variable_names": ["w_placeholder"],
+      "objective": [0.0],
+      "bounds": [{"lower": 0.0, "upper": 1.0}],
+      "constraints": {
+        "matrix": [],
+        "rhs": [],
+        "senses": []
+      },
+      "linking_columns": {
+        "rows": [0],
+        "cols": [0],
+        "values": [1.0]
+      }
+    }
+  ]
+}

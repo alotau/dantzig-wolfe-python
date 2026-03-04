@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "metadata": {
+    "name": "simple_two_block",
+    "description": "Minimal 2-block 1-linking-constraint LP. Known optimal: x1=0, x2=3, obj=-9."
+  },
+  "master": {
+    "constraint_names": ["Con1"],
+    "rhs": [3.0],
+    "senses": ["="]
+  },
+  "blocks": [
+    {
+      "block_id": "block_0",
+      "variable_names": ["x1"],
+      "objective": [-2.0],
+      "bounds": [{"lower": 0.0, "upper": 2.0}],
+      "constraints": {
+        "matrix": [],
+        "rhs": [],
+        "senses": []
+      },
+      "linking_columns": {
+        "rows": [0],
+        "cols": [0],
+        "values": [1.0]
+      }
+    },
+    {
+      "block_id": "block_1",
+      "variable_names": ["x2"],
+      "objective": [-3.0],
+      "bounds": [{"lower": 0.0, "upper": 3.0}],
+      "constraints": {
+        "matrix": [],
+        "rhs": [],
+        "senses": []
+      },
+      "linking_columns": {
+        "rows": [0],
+        "cols": [0],
+        "values": [1.0]
+      }
+    }
+  ]
+}

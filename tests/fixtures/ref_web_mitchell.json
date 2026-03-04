@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "metadata": {
+    "name": "ref_web_mitchell",
+    "description": "Mitchell DW decomposition example (rpi.edu). 1-block decomposition with bound-only subproblem. Known optimal: x1=0.0, x2=1.0, x3=2.0, obj=-5.0."
+  },
+  "master": {
+    "constraint_names": ["Con1"],
+    "rhs": [3.0],
+    "senses": ["="]
+  },
+  "blocks": [
+    {
+      "block_id": "block_0",
+      "variable_names": ["x1", "x2", "x3"],
+      "objective": [1.0, -1.0, -2.0],
+      "bounds": [
+        {"lower": 0.0, "upper": 2.0},
+        {"lower": 0.0, "upper": null},
+        {"lower": 0.0, "upper": 2.0}
+      ],
+      "constraints": {
+        "matrix": [],
+        "rhs": [],
+        "senses": []
+      },
+      "linking_columns": {
+        "rows": [0, 0, 0],
+        "cols": [0, 1, 2],
+        "values": [1.0, 1.0, 1.0]
+      }
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "metadata": {
+    "name": "ref_book_bertsimas",
+    "description": "Bertsimas & Tsitsiklis Introduction to Linear Optimization example 6.2 (p.245-246). 1-subproblem DW decomposition. Known optimal: x1=2.0, x2=1.5, x3=2.0, obj=-21.5."
+  },
+  "master": {
+    "constraint_names": ["Con1"],
+    "rhs": [17.0],
+    "senses": ["="]
+  },
+  "blocks": [
+    {
+      "block_id": "block_0",
+      "variable_names": ["x1", "x2", "x3"],
+      "objective": [-4.0, -1.0, -6.0],
+      "bounds": [
+        {"lower": 1.0, "upper": 2.0},
+        {"lower": 1.0, "upper": 2.0},
+        {"lower": 1.0, "upper": 2.0}
+      ],
+      "constraints": {
+        "matrix": [],
+        "rhs": [],
+        "senses": []
+      },
+      "linking_columns": {
+        "rows": [0, 0, 0],
+        "cols": [0, 1, 2],
+        "values": [3.0, 2.0, 4.0]
+      }
+    }
+  ]
+}

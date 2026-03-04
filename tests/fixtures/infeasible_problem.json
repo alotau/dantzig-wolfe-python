@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "metadata": {
+    "name": "infeasible_problem",
+    "description": "Infeasible LP: master requires x1+x2=10 but block bounds cap x1<=3, x2<=5 (max sum=8)."
+  },
+  "master": {
+    "constraint_names": ["Con1"],
+    "rhs": [10.0],
+    "senses": ["="]
+  },
+  "blocks": [
+    {
+      "block_id": "block_0",
+      "variable_names": ["x1"],
+      "objective": [1.0],
+      "bounds": [{"lower": 0.0, "upper": 3.0}],
+      "constraints": {
+        "matrix": [],
+        "rhs": [],
+        "senses": []
+      },
+      "linking_columns": {
+        "rows": [0],
+        "cols": [0],
+        "values": [1.0]
+      }
+    },
+    {
+      "block_id": "block_1",
+      "variable_names": ["x2"],
+      "objective": [1.0],
+      "bounds": [{"lower": 0.0, "upper": 5.0}],
+      "constraints": {
+        "matrix": [],
+        "rhs": [],
+        "senses": []
+      },
+      "linking_columns": {
+        "rows": [0],
+        "cols": [0],
+        "values": [1.0]
+      }
+    }
+  ]
+}
