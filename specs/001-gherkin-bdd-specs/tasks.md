@@ -97,11 +97,11 @@ Run `dwsolver missing.json`; verify error on stderr, exit code 1.
 
 ### Implementation
 
-- [ ] T024 [US2] Implement BDD steps for `features/cli_usage.feature` — infeasible scenario ("Output indicates infeasible") in `tests/bdd/steps/test_cli_usage.py` — assert on output JSON `status`, empty `variable_values`, null `objective`, exit code 0
-- [ ] T025 [US2] Implement BDD steps for `features/cli_usage.feature` — unbounded scenario ("Output indicates unbounded") in `tests/bdd/steps/test_cli_usage.py` — same assertions for `status == "unbounded"`
-- [ ] T026 [P] [US2] Implement BDD steps for `features/cli_usage.feature` — error handling scenarios ("Malformed input file", "Missing input file", "Error message goes to stderr", "Unwritable output path") in `tests/bdd/steps/test_cli_usage.py` — use `CliRunner`; assert stderr content, non-zero exit, no output file created
-- [ ] T027 [US2] Verify `solver.py` Phase I returns `Result(status=INFEASIBLE)` when artificials cannot be driven to zero — add integration test in `tests/unit/test_solver.py` using `tests/fixtures/infeasible_problem.json`
-- [ ] T028 [P] [US2] Verify `solver.py` returns `Result(status=UNBOUNDED)` when a subproblem is unbounded — add integration test in `tests/unit/test_solver.py` using `tests/fixtures/unbounded_problem.json`
+- [X] T024 [US2] Implement BDD steps for `features/cli_usage.feature` — infeasible scenario ("Output indicates infeasible") in `tests/bdd/steps/test_cli_usage.py` — assert on output JSON `status`, empty `variable_values`, null `objective`, exit code 0
+- [X] T025 [US2] Implement BDD steps for `features/cli_usage.feature` — unbounded scenario ("Output indicates unbounded") in `tests/bdd/steps/test_cli_usage.py` — same assertions for `status == "unbounded"`
+- [X] T026 [P] [US2] Implement BDD steps for `features/cli_usage.feature` — error handling scenarios ("Malformed input file", "Missing input file", "Error message goes to stderr", "Unwritable output path") in `tests/bdd/steps/test_cli_usage.py` — use `CliRunner`; assert stderr content, non-zero exit, no output file created
+- [X] T027 [US2] Verify `solver.py` Phase I returns `Result(status=INFEASIBLE)` when artificials cannot be driven to zero — add integration test in `tests/unit/test_solver.py` using `tests/fixtures/infeasible_problem.json`
+- [X] T028 [P] [US2] Verify `solver.py` returns `Result(status=UNBOUNDED)` when a subproblem is unbounded — add integration test in `tests/unit/test_solver.py` using `tests/fixtures/unbounded_problem.json`
 
 **Checkpoint**: All US2 BDD scenarios pass; `pytest tests/bdd/` shows 0 failures for cli_usage.feature scenarios 1–7.
 
@@ -118,11 +118,11 @@ construct a two-block LP object; call `result = solve(problem)`; assert
 
 ### Implementation
 
-- [ ] T029 [US3] Implement BDD steps for `features/library_usage.feature` — optimal solve scenarios ("Solve a valid problem via library", "Access variable_values") in `tests/bdd/steps/test_library_usage.py` — construct `Problem` directly from Python objects (no file I/O); call `solve()`; assert result fields
-- [ ] T030 [P] [US3] Implement BDD steps for `features/library_usage.feature` — stateless-call scenario ("Stateless calls produce consistent results") in `tests/bdd/steps/test_library_usage.py` — call `solve()` twice with same problem; assert results are equal
-- [ ] T031 [P] [US3] Implement BDD steps for `features/library_usage.feature` — infeasible/unbounded library scenarios ("Infeasible problem via library", "Unbounded problem via library") in `tests/bdd/steps/test_library_usage.py` — assert `variable_values == {}`, correct status
-- [ ] T032 [P] [US3] Implement BDD steps for `features/library_usage.feature` — `workers` and `tolerance` scenarios ("Deterministic results across worker counts", "Custom tolerance recorded in result") in `tests/bdd/steps/test_library_usage.py`
-- [ ] T033 [P] [US3] Implement BDD step for `features/library_usage.feature` — `Problem.from_file()` scenario ("Load problem from file via library") in `tests/bdd/steps/test_library_usage.py`
+- [X] T029 [US3] Implement BDD steps for `features/library_usage.feature` — optimal solve scenarios ("Solve a valid problem via library", "Access variable_values") in `tests/bdd/steps/test_library_usage.py` — construct `Problem` directly from Python objects (no file I/O); call `solve()`; assert result fields
+- [X] T030 [P] [US3] Implement BDD steps for `features/library_usage.feature` — stateless-call scenario ("Stateless calls produce consistent results") in `tests/bdd/steps/test_library_usage.py` — call `solve()` twice with same problem; assert results are equal
+- [X] T031 [P] [US3] Implement BDD steps for `features/library_usage.feature` — infeasible/unbounded library scenarios ("Infeasible problem via library", "Unbounded problem via library") in `tests/bdd/steps/test_library_usage.py` — assert `variable_values == {}`, correct status
+- [X] T032 [P] [US3] Implement BDD steps for `features/library_usage.feature` — `workers` and `tolerance` scenarios ("Deterministic results across worker counts", "Custom tolerance recorded in result") in `tests/bdd/steps/test_library_usage.py`
+- [X] T033 [P] [US3] Implement BDD step for `features/library_usage.feature` — `Problem.from_file()` scenario ("Load problem from file via library") in `tests/bdd/steps/test_library_usage.py`
 
 **Checkpoint**: All US3 BDD scenarios pass; `from dwsolver import solve, Problem, Result, SolveStatus` works without touching `cli.py`.
 
@@ -138,9 +138,9 @@ arrays; assert `DWSolverInputError` is raised and `str(exc)` identifies the fiel
 
 ### Implementation
 
-- [ ] T034 [US4] Implement BDD steps for `features/library_usage.feature` — error handling scenario ("DWSolverInputError raised for invalid input", "Exception importable from top-level") in `tests/bdd/steps/test_library_usage.py` — use `pytest.raises(DWSolverInputError)`, assert message content, assert `from dwsolver import DWSolverInputError` works
-- [ ] T035 [US4] Implement BDD step for `features/library_usage.feature` — `iteration_limit` partial result scenario ("Iteration limit returns best feasible solution") in `tests/bdd/steps/test_library_usage.py` — pass `max_iterations=1`, assert `status == "iteration_limit"`, `variable_values` populated, `objective` is float
-- [ ] T036 [P] [US4] Add remaining `DWSolverInputError` trigger paths to `tests/unit/test_models.py`: unsupported `schema_version`, duplicate `variable_names` across blocks, `lower > upper`, invalid sense string, `rows[k]` or `cols[k]` index out of range
+- [X] T034 [US4] Implement BDD steps for `features/library_usage.feature` — error handling scenario ("DWSolverInputError raised for invalid input", "Exception importable from top-level") in `tests/bdd/steps/test_library_usage.py` — use `pytest.raises(DWSolverInputError)`, assert message content, assert `from dwsolver import DWSolverInputError` works
+- [X] T035 [US4] Implement BDD step for `features/library_usage.feature` — `iteration_limit` partial result scenario ("Iteration limit returns best feasible solution") in `tests/bdd/steps/test_library_usage.py` — pass `max_iterations=1`, assert `status == "iteration_limit"`, `variable_values` populated, `objective` is float
+- [X] T036 [P] [US4] Add remaining `DWSolverInputError` trigger paths to `tests/unit/test_models.py`: unsupported `schema_version`, duplicate `variable_names` across blocks, `lower > upper`, invalid sense string, `rows[k]` or `cols[k]` index out of range
 
 **Checkpoint**: All US4 BDD scenarios pass; `pytest tests/unit/` and `pytest tests/bdd/` show 0 failures.
 
@@ -151,11 +151,11 @@ arrays; assert `DWSolverInputError` is raised and `str(exc)` identifies the fiel
 **Purpose**: CI wire-up, type-checking cleanliness, SC-001 regression verification,
 and documentation completeness.
 
-- [ ] T037 Run `mypy src/` in strict mode and resolve all remaining type errors across `models.py`, `solver.py`, `subproblem.py`, `cli.py`, `__init__.py`
-- [ ] T038 Run `ruff check src/ tests/` and `ruff format --check src/ tests/` — fix all lint/format violations
-- [ ] T039 Verify SC-001: run `dwsolver` against all reference fixture problems in `tests/fixtures/`; assert 100% correct status classification and objective values match known optima; add failures as regression test cases in `tests/unit/test_solver.py`
-- [ ] T040 [P] Write `README.md` — install instructions, one-line CLI example, 10-line library example (matching `quickstart.md`), link to JSON schema reference
-- [ ] T041 [P] Verify CI pipeline passes end-to-end on a clean `git push` — all 5 stages green: ruff, mypy, pytest unit, pytest BDD
+- [X] T037 Run `mypy src/` in strict mode and resolve all remaining type errors across `models.py`, `solver.py`, `subproblem.py`, `cli.py`, `__init__.py`
+- [X] T038 Run `ruff check src/ tests/` and `ruff format --check src/ tests/` — fix all lint/format violations
+- [X] T039 Verify SC-001: run `dwsolver` against all reference fixture problems in `tests/fixtures/`; assert 100% correct status classification and objective values match known optima; add failures as regression test cases in `tests/unit/test_solver.py`
+- [X] T040 [P] Write `README.md` — install instructions, one-line CLI example, 10-line library example (matching `quickstart.md`), link to JSON schema reference
+- [X] T041 [P] Verify CI pipeline passes end-to-end on a clean `git push` — all 5 stages green: ruff, mypy, pytest unit, pytest BDD
 
 ---
 

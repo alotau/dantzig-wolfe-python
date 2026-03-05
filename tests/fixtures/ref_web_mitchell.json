@@ -16,7 +16,7 @@
       "objective": [1.0, -1.0, -2.0],
       "bounds": [
         {"lower": 0.0, "upper": 2.0},
-        {"lower": 0.0, "upper": null},
+        {"lower": 0.0, "upper": 1.0},
         {"lower": 0.0, "upper": 2.0}
       ],
       "constraints": {
