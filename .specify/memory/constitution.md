@@ -1,18 +1,16 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 2.0.0 → 2.0.1 (PATCH: corrected Principle II protocol line — "stdout" changed to "designated output file (not stdout)" to match FR-005 and all Gherkin scenarios)
-Previous: 1.0.0 → 2.0.0 (MAJOR: mandatory input-format compatibility constraint removed from Principle II)
-Modified principles:
-  - II. CLI Interface — removed requirement to support original C solver input formats;
-    original test files/expected outputs are now a guide, not a format mandate.
-Added sections: N/A
+Version change: 2.0.1 → 2.0.2 (PATCH: added explicit branch-discipline step to Development
+Workflow — direct pushes to main are already forbidden per CI/CD section; this makes the
+rule unambiguous for both humans and AI agents executing implementation tasks)
+Previous: 2.0.0 → 2.0.1 (PATCH: corrected Principle II protocol line — "stdout" changed to "designated output file (not stdout)" to match FR-005 and all Gherkin scenarios)
+Modified principles: N/A
+Added sections: Development Workflow — step 0 (branch discipline)
 Removed sections: N/A
 Templates requiring updates:
-  - .specify/templates/plan-template.md  ✅ aligned (no changes required)
-  - .specify/templates/spec-template.md  ✅ aligned (no changes required)
-  - .specify/templates/tasks-template.md ✅ aligned (no changes required)
-Follow-up TODOs: none — all placeholders resolved.
+  - .specify/templates/tasks-template.md  — consider noting branch requirement in task preamble
+Follow-up TODOs: enforce branch protection rules on GitHub to block pushes to main at the remote.
 -->
 
 # DWSolver Constitution
@@ -99,6 +97,12 @@ forbidden. All changes arrive via pull requests.
 
 ## Development Workflow
 
+0. **Branch discipline (NON-NEGOTIABLE)** — all work MUST happen on a feature branch,
+   never directly on `main`. Branch names MUST follow the pattern `<spec-id>-<slug>`
+   (e.g., `001-gherkin-bdd-specs`). `git push` MUST only ever target a feature branch.
+   Direct commits or pushes to `main` — by humans or AI agents — are **forbidden**.
+   This applies at every step: setup, implementation, polish, and hotfixes alike.
+
 1. **Spec first** — new capabilities begin with a feature spec (`/speckit.spec`)
    before any code is written.
 2. **Plan before build** — an implementation plan (`/speckit.plan`) is produced
@@ -140,4 +144,4 @@ document prevails.
 **Compliance review**: Every PR reviewer MUST check compliance with this
 constitution. Non-compliance blocks merge, same as a failing test.
 
-**Version**: 2.0.1 | **Ratified**: 2026-03-03 | **Last Amended**: 2026-03-03
+**Version**: 2.0.2 | **Ratified**: 2026-03-03 | **Last Amended**: 2026-03-04
