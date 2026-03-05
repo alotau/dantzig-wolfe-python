@@ -2,7 +2,7 @@
 
 A Python implementation of the **Dantzig-Wolfe decomposition algorithm** for block-angular linear programs.
 
-[![CI](https://github.com/alotau/dwsolver-vibes/actions/workflows/ci.yml/badge.svg)](https://github.com/alotau/dwsolver-vibes/actions/workflows/ci.yml)
+[![CI](https://github.com/alotau/dantzig-wolfe-python/actions/workflows/ci.yml/badge.svg)](https://github.com/alotau/dantzig-wolfe-python/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
 ## Installation
