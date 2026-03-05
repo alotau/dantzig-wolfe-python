@@ -22,6 +22,8 @@ cd src [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECHNOLO
 Python 3.11+: Follow standard conventions
 
 ## Recent Changes
+- 002-fix-four-sea-tests: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
+- 002-fix-four-sea-tests: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 
 - 001-gherkin-bdd-specs: Added Python 3.11+ + `highspy` (HiGHS LP solver), `concurrent.futures` (stdlib), `click` (CLI), `pytest` + BDD runner (testing), `ruff` (lint/format), `mypy` (type checking)
 
