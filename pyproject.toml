@@ -1,0 +1,60 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "dwsolver"
+version = "0.1.0"
+description = "Dantzig-Wolfe decomposition solver"
+requires-python = ">=3.11"
+dependencies = [
+    "highspy",
+    "click",
+    "pydantic>=2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-bdd",
+    "ruff",
+    "mypy",
+    "highspy",
+]
+
+[project.scripts]
+dwsolver = "dwsolver.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/dwsolver"]
+
+# ---------------------------------------------------------------------------
+# Ruff — lint + format (T004)
+# ---------------------------------------------------------------------------
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = []
+
+# ---------------------------------------------------------------------------
+# Mypy — strict mode (T005)
+# ---------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+
+[[tool.mypy.overrides]]
+module = ["highspy.*"]
+ignore_missing_imports = true
+
+# ---------------------------------------------------------------------------
+# Pytest + pytest-bdd (T006)
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+bdd_features_base_dir = "specs/001-gherkin-bdd-specs/features"

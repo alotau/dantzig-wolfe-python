@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.pyo
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+.env
+.env.*
+*.log
+
+# Hatch / pip
+.hatch/
+*.dist-info/
+
+# Mypy cache
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Ruff cache
+.ruff_cache/
+
+# Pytest
+.pytest_cache/
+.cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# JetBrains / VSCode
+.idea/
+.vscode/
+*.swp
+*.tmp
+
+# Jupyter
+.ipynb_checkpoints/

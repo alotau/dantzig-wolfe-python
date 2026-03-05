@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "metadata": {
+    "name": "ref_book_lasdon",
+    "description": "Lasdon Optimization Theory for Large Systems example 3.5 (p.155-160). 2-block decomposition. Known optimal: x1=8.3333, x2=3.3333, y1=10.0, y2=5.0, obj=-110/3 ~= -36.6667."
+  },
+  "master": {
+    "constraint_names": ["Con1"],
+    "rhs": [40.0],
+    "senses": ["<="]
+  },
+  "blocks": [
+    {
+      "block_id": "block_0",
+      "variable_names": ["x1", "x2"],
+      "objective": [-1.0, -1.0],
+      "bounds": [
+        {"lower": 0.0, "upper": null},
+        {"lower": 0.0, "upper": null}
+      ],
+      "constraints": {
+        "matrix": [
+          [1.0, 3.0],
+          [2.0, 1.0]
+        ],
+        "rhs": [30.0, 20.0],
+        "senses": ["<=", "<="]
+      },
+      "linking_columns": {
+        "rows": [0, 0],
+        "cols": [0, 1],
+        "values": [1.0, 2.0]
+      }
+    },
+    {
+      "block_id": "block_1",
+      "variable_names": ["y1", "y2"],
+      "objective": [-2.0, -1.0],
+      "bounds": [
+        {"lower": 0.0, "upper": null},
+        {"lower": 0.0, "upper": null}
+      ],
+      "constraints": {
+        "matrix": [
+          [1.0, 0.0],
+          [0.0, 1.0],
+          [1.0, 1.0]
+        ],
+        "rhs": [10.0, 10.0, 15.0],
+        "senses": ["<=", "<=", "<="]
+      },
+      "linking_columns": {
+        "rows": [0, 0],
+        "cols": [0, 1],
+        "values": [2.0, 1.0]
+      }
+    }
+  ]
+}
