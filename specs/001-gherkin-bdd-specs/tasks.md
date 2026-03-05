@@ -50,10 +50,10 @@ be complete and passing mypy/ruff before any story implementation begins.
 
 > ⚠️ **Constitution Principle III (NON-NEGOTIABLE — Test-First)**: T015 MUST be written and confirmed failing **before** T012–T014 implementation begins. The `[P]` marker means T015 may live on a parallel branch; it does not permit writing tests after implementation.
 
-- [ ] T015 [P] Write `tests/unit/test_models.py` — unit tests for all validators (happy path + each error condition), `from_file()` with valid/missing/malformed files, `SolveStatus` string values, `Result` field constraints per status
-- [ ] T012 Implement `src/dwsolver/models.py` — all Pydantic v2 models: `SolveStatus`, `Bounds`, `BlockConstraints`, `LinkingColumns`, `Block`, `Master`, `Problem` (with `from_file()` stub), `Result`, `DWSolverInputError`, and constants `DEFAULT_TOLERANCE = 1e-6`, `DEFAULT_WORKERS = None`, `MAX_ITERATIONS = 1000`
-- [ ] T013 Add cross-field Pydantic validators to `src/dwsolver/models.py`: dimension consistency (`len(variable_names) == len(objective) == len(bounds)`), unique `block_id` values, valid `rows[k]` and `cols[k]` in `LinkingColumns` are valid indices into `master.constraint_names` and the block's `variable_names` respectively, `senses` values ∈ `{"=", "<=", ">="}`, `lower <= upper` in `Bounds`, `schema_version` major == `"1"`
-- [ ] T014 Implement `Problem.from_file()` in `src/dwsolver/models.py` — read JSON from path, call `model_validate`, raise `DWSolverInputError` on `FileNotFoundError`, `JSONDecodeError`, and `ValidationError`
+- [X] T015 [P] Write `tests/unit/test_models.py` — unit tests for all validators (happy path + each error condition), `from_file()` with valid/missing/malformed files, `SolveStatus` string values, `Result` field constraints per status
+- [X] T012 Implement `src/dwsolver/models.py` — all Pydantic v2 models: `SolveStatus`, `Bounds`, `BlockConstraints`, `LinkingColumns`, `Block`, `Master`, `Problem` (with `from_file()` stub), `Result`, `DWSolverInputError`, and constants `DEFAULT_TOLERANCE = 1e-6`, `DEFAULT_WORKERS = None`, `MAX_ITERATIONS = 1000`
+- [X] T013 Add cross-field Pydantic validators to `src/dwsolver/models.py`: dimension consistency (`len(variable_names) == len(objective) == len(bounds)`), unique `block_id` values, valid `rows[k]` and `cols[k]` in `LinkingColumns` are valid indices into `master.constraint_names` and the block's `variable_names` respectively, `senses` values ∈ `{"=", "<=", ">="}`, `lower <= upper` in `Bounds`, `schema_version` major == `"1"`
+- [X] T014 Implement `Problem.from_file()` in `src/dwsolver/models.py` — read JSON from path, call `model_validate`, raise `DWSolverInputError` on `FileNotFoundError`, `JSONDecodeError`, and `ValidationError`
 
 **Checkpoint**: `pytest tests/unit/test_models.py` passes; `mypy src/dwsolver/models.py` passes with strict mode.
 
