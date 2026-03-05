@@ -37,4 +37,5 @@ jobs:
         run: pytest tests/unit/ -v
 
       - name: BDD tests
-        run: pytest tests/bdd/ -v
+        # Exit code 5 = no tests collected (BDD steps added incrementally); treat as pass.
+        run: pytest tests/bdd/ -v; code=$?; [ $code -eq 5 ] && exit 0 || exit $code
