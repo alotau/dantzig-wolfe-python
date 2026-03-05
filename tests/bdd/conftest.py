@@ -15,12 +15,8 @@ from click.testing import CliRunner
 
 @pytest.fixture
 def cli_runner() -> CliRunner:
-    """Return a Click CliRunner with isolated filesystem disabled.
-
-    The runner uses ``mix_stderr=False`` so stdout and stderr are
-    separately accessible in BDD step assertions.
-    """
-    return CliRunner(mix_stderr=False)
+    """Return a Click CliRunner instance for invoking the CLI."""
+    return CliRunner()
 
 
 @pytest.fixture

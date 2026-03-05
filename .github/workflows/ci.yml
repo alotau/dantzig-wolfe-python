@@ -38,4 +38,12 @@ jobs:
 
       - name: BDD tests
         # Exit code 5 = no tests collected (BDD steps added incrementally); treat as pass.
-        run: pytest tests/bdd/ -v; code=$?; [ $code -eq 5 ] && exit 0 || exit $code
+        # Use `set +e` before pytest so bash's errexit (-e) doesn't fire before
+        # we can capture $? and branch on it.
+        run: |
+          set +e
+          pytest tests/bdd/ -v
+          code=$?
+          set -e
+          if [ "$code" -eq 5 ]; then exit 0; fi
+          exit "$code"
