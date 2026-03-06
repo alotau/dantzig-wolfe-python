@@ -168,6 +168,32 @@ special treatment.
 
 ---
 
+## Decision 6: Local Constraint Senses — `<=` and `>=` Only
+
+**Decision**: The generator produces only `<=` and `>=` senses for *local* (per-block)
+constraint rows by cycling `["<=", ">=", "<=", …]`. The `=` sense documented in
+*spec.md §Feasibility Design* is intentionally excluded from local constraints.
+
+**Rationale**:
+- The spec's Feasibility Design section documents the construction *method* for `=`
+  constraints (`rhs = a @ x*` exactly). That construction is mathematically correct
+  but adds no structural diversity for cross-validation purposes: an equality-only block
+  is a degenerate edge case that the DW master problem handles identically to the
+  `<=`/`>=` case.
+- Excluding `=` from local constraints keeps the block subproblem LP bounded and
+  non-degenerate for all seeds in the 12-case table — the HiGHS solver on each block
+  benefits from having strict slack (Uniform(0.1, 0.5)) rather than a tight equality.
+- The `=` sense IS used for master (linking) constraints: `sense_m = "="` when
+  `m == master_constraints - 1 and master_constraints >= 3` (seeds 9–12), providing
+  the equality constraint coverage required by US2 scenario 3.
+
+**Spec alignment**: spec.md's Feasibility Design section is a reference for the general
+construction; this decision narrows the generated set to `<=`/`>=` locally.
+No spec change is required — the `=` construction math remains valid documentation
+for any future extension that enables local equality constraints.
+
+---
+
 ## Resolved Clarifications
 
 All items are fully resolved. No NEEDS CLARIFICATION items remain.

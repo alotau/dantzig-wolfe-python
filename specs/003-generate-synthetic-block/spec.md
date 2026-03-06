@@ -40,7 +40,9 @@ the float is the HiGHS reference objective. Call `solve(problem)` and assert the
    `Problem` instance that passes `Problem.model_validate()` without error and a finite
    reference objective from HiGHS.
 2. **Given** the same seed called twice, **When** the results are compared, **Then** the
-   `Problem` and reference objective are bit-for-bit identical (determinism guaranteed).
+   `Problem` and reference objective are bit-for-bit identical within the same `numpy` major
+   version (determinism guaranteed for `numpy>=1.24, <2`; upgrading to a new major numpy version
+   may change floating-point sequences and requires re-verifying the test suite).
 3. **Given** a generated `Problem`, **When** `dwsolver.solve()` is called, **Then** the returned
    objective is within `CROSS_VALIDATION_ABS_TOL` of the HiGHS reference.
 

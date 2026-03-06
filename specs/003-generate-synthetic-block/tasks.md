@@ -82,9 +82,9 @@ implicitly verified by `Problem.model_validate()` inside `generate_problem`.
 
 **Purpose**: Satisfy mypy strict, ruff clean, and confirm no regressions.
 
-- [ ] T011 [P] Run `mypy --strict tests/synthetic.py` and fix any type errors — add `npt.NDArray[np.float64]` annotations for numpy arrays; ensure `SyntheticCase` and `GeneratedProblem` have complete type hints; no `type: ignore` comments unless unavoidable
+- [ ] T011 [P] Run `mypy --strict tests/synthetic.py tests/unit/test_synthetic.py` and fix any type errors — add `npt.NDArray[np.float64]` annotations for numpy arrays; ensure `SyntheticCase` and `GeneratedProblem` have complete type hints in both files; no `type: ignore` comments unless unavoidable
 - [ ] T012 [P] Run `ruff check --fix tests/synthetic.py tests/unit/test_synthetic.py` then `ruff format tests/synthetic.py tests/unit/test_synthetic.py` — zero lint errors, consistent formatting
-- [ ] T013 Run full `pytest tests/ -v` and confirm all tests pass (existing 121 + 12 parametrized + 3 US1 tests = 136 total); no regressions in `tests/unit/` or `tests/bdd/`
+- [ ] T013 Run full `pytest tests/ -v` and confirm all tests pass (existing 121 + 12 parametrized + 3 US1 tests = 136 total); no regressions in `tests/unit/` or `tests/bdd/`; **SC-005 gate**: record the CI wall-clock time for this job in the PR description and assert it is under 90 seconds
 
 ---
 
