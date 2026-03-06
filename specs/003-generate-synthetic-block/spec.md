@@ -62,7 +62,7 @@ readable.
 
 1. **Given** a table of 12 `SyntheticCase` entries, **When** `pytest tests/unit/test_synthetic.py` runs,
    **Then** each item is displayed with a human-readable ID
-   (e.g. `test_cross_validate[seed=42-2blk-5var-4mc]`) and passes.
+   (e.g. `test_cross_validate[seed=6-4blk-5var-4mc]`) and passes.
 2. **Given** the suite runs on a cold CI machine, **When** all 12 tests complete,
    **Then** total elapsed time is under 60 seconds.
 3. **Given** a structural diversity requirement, **When** inspecting the 12 seeds,
@@ -118,7 +118,7 @@ readable.
 
 - **`SyntheticCase`**: dataclass holding `seed: int`, `num_blocks: int`,
   `vars_per_block: int`, `local_constraints: int`, `master_constraints: int`,
-  `label: str` (used as pytest ID, e.g. `"seed=42-2blk-5var-4mc"`).
+  `label: str` (used as pytest ID, e.g. `"seed=6-4blk-5var-4mc"`).
 - **`GeneratedProblem`**: return type of `generate_problem` holding
   `problem: Problem` and `reference_objective: float`.
 
