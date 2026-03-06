@@ -13,8 +13,11 @@ Covers:
 from __future__ import annotations
 
 import math
+from dataclasses import dataclass, field
 from pathlib import Path
 from unittest.mock import patch
+
+import pytest
 
 from dwsolver.models import (
     DEFAULT_TOLERANCE,
@@ -311,70 +314,71 @@ class TestSingleBlockEdgeCase:
 # ---------------------------------------------------------------------------
 
 
+@dataclass
+class _RefCase:
+    """Expected outcomes for a single reference fixture."""
+
+    filename: str
+    expected_obj: float
+    expected_vars: dict[str, float] = field(default_factory=dict)
+    # When True, only assert the objective is finite and positive (multiple
+    # optimal bases exist so the exact value is solver-dependent).
+    finite_positive_only: bool = False
+
+
+_CASES: list[_RefCase] = [
+    _RefCase(
+        "ref_book_bertsimas.json",
+        expected_obj=-21.5,
+        expected_vars={"x1": 2.0, "x2": 1.5, "x3": 2.0},
+    ),
+    _RefCase(
+        "ref_book_lasdon.json",
+        expected_obj=-36.6667,
+        expected_vars={"x1": 8.3333, "x2": 3.3333, "y1": 10.0, "y2": 5.0},
+    ),
+    _RefCase(
+        # Multiple optimal bases — verify objective is finite and positive only.
+        "ref_book_dantzig.json",
+        expected_obj=0.0,  # unused when finite_positive_only=True
+        finite_positive_only=True,
+    ),
+    _RefCase(
+        "ref_web_mitchell.json",
+        expected_obj=-5.0,
+        expected_vars={"x1": 0.0, "x2": 1.0, "x3": 2.0},
+    ),
+    _RefCase(
+        "ref_web_trick.json",
+        expected_obj=-40.0,
+        expected_vars={"x1": 3.0, "x2": 2.0, "x3": 3.0},
+    ),
+    _RefCase(
+        # 8-aircraft LAS→SEA LP; +160 constant encoded via __objective_constant__
+        # dummy variable in block_1 (lower=upper=1, coeff=160).
+        "ref_four_sea.json",
+        expected_obj=12.0,
+    ),
+]
+
+
+@pytest.mark.parametrize("case", _CASES, ids=[c.filename for c in _CASES])
 class TestSC001Regression:
-    """SC-001: solver must classify all reference fixtures correctly and match
-    known optimal objective values and variable assignments.
+    """SC-001: solver returns OPTIMAL with correct objective for every reference
+    fixture.  The parametrize IDs are the fixture filenames so CI output makes
+    it immediately obvious which file is under test.
     """
 
-    def test_ref_book_bertsimas(self) -> None:
-        """Bertsimas & Tsitsiklis example 6.2: known opt -21.5, x1=2,x2=1.5,x3=2."""
-        result = solve(Problem.from_file(FIXTURES / "ref_book_bertsimas.json"))
+    def test_reference_fixture(self, case: _RefCase) -> None:
+        """Load fixture, solve, assert status and objective (and variable values
+        where a unique optimum is known)."""
+        result = solve(Problem.from_file(FIXTURES / case.filename))
         assert result.status == SolveStatus.OPTIMAL
         assert result.objective is not None
-        assert math.isclose(result.objective, -21.5, abs_tol=0.01)
-        assert math.isclose(result.variable_values["x1"], 2.0, abs_tol=0.01)
-        assert math.isclose(result.variable_values["x2"], 1.5, abs_tol=0.01)
-        assert math.isclose(result.variable_values["x3"], 2.0, abs_tol=0.01)
-
-    def test_ref_book_lasdon(self) -> None:
-        """Lasdon example 3.5: known opt ≈ -36.6667."""
-        result = solve(Problem.from_file(FIXTURES / "ref_book_lasdon.json"))
-        assert result.status == SolveStatus.OPTIMAL
-        assert result.objective is not None
-        assert math.isclose(result.objective, -36.6667, abs_tol=0.01)
-        assert math.isclose(result.variable_values["x1"], 8.3333, abs_tol=0.01)
-        assert math.isclose(result.variable_values["x2"], 3.3333, abs_tol=0.01)
-        assert math.isclose(result.variable_values["y1"], 10.0, abs_tol=0.01)
-        assert math.isclose(result.variable_values["y2"], 5.0, abs_tol=0.01)
-
-    def test_ref_book_dantzig(self) -> None:
-        """Dantzig & Thapa example: multiple optimal bases — verify objective only."""
-        result = solve(Problem.from_file(FIXTURES / "ref_book_dantzig.json"))
-        assert result.status == SolveStatus.OPTIMAL
-        # objective expected = 63.5789...; the exact value depends on which optimal
-        # basis the solver finds, but must be finite and positive.
-        assert result.objective is not None
-        assert math.isfinite(result.objective)
-        assert result.objective > 0
-
-    def test_ref_web_mitchell(self) -> None:
-        """Mitchell DW example: known opt -5.0, x1=0,x2=1,x3=2."""
-        result = solve(Problem.from_file(FIXTURES / "ref_web_mitchell.json"))
-        assert result.status == SolveStatus.OPTIMAL
-        assert result.objective is not None
-        assert math.isclose(result.objective, -5.0, abs_tol=0.01)
-        assert math.isclose(result.variable_values["x1"], 0.0, abs_tol=0.01)
-        assert math.isclose(result.variable_values["x2"], 1.0, abs_tol=0.01)
-        assert math.isclose(result.variable_values["x3"], 2.0, abs_tol=0.01)
-
-    def test_ref_web_trick(self) -> None:
-        """Trick DW example: known opt -40.0, x1=3,x2=2,x3=3."""
-        result = solve(Problem.from_file(FIXTURES / "ref_web_trick.json"))
-        assert result.status == SolveStatus.OPTIMAL
-        assert result.objective is not None
-        assert math.isclose(result.objective, -40.0, abs_tol=0.01)
-        assert math.isclose(result.variable_values["x1"], 3.0, abs_tol=0.01)
-        assert math.isclose(result.variable_values["x2"], 2.0, abs_tol=0.01)
-        assert math.isclose(result.variable_values["x3"], 3.0, abs_tol=0.01)
-
-    def test_ref_four_sea(self) -> None:
-        """four_sea LAS→SEA air-traffic LP: 8 aircraft, 4 D-W blocks, known opt 12.0.
-
-        The +160 objective constant (CPLEX comment) is encoded as a fixed
-        dummy variable in block_1; without it the LP variable-part optimum
-        is -148.0, giving the correct business objective 12.0 = 160 + (-148).
-        """
-        result = solve(Problem.from_file(FIXTURES / "ref_four_sea.json"))
-        assert result.status == SolveStatus.OPTIMAL
-        assert result.objective is not None
-        assert math.isclose(result.objective, 12.0, abs_tol=0.01)
+        if case.finite_positive_only:
+            assert math.isfinite(result.objective)
+            assert result.objective > 0
+        else:
+            assert math.isclose(result.objective, case.expected_obj, abs_tol=0.01)
+        for var, expected in case.expected_vars.items():
+            assert math.isclose(result.variable_values[var], expected, abs_tol=0.01)
