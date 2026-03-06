@@ -34,7 +34,7 @@ must NOT be imported by any `src/dwsolver/` module; no new runtime dependencies
 | II (CLI Interface) | ✅ Pass | No changes to CLI layer. Generator's own CLI (`python tests/synthetic.py`) is a dev tool, not a shipped command. |
 | III (Test-First) | ✅ Pass | Tests written before generator implementation. Baseline: `test_synthetic.py` collects 0 items (module missing) → write tests → make them pass. |
 | IV (Parallel by Design) | ✅ Pass | No changes to subproblem dispatch. Test suite itself may exercise parallel dispatch (default workers). |
-| V (Numerical Correctness) | ✅ Pass | HiGHS reference objective is computed from the same `Problem` JSON encoding — self-consistency check. `abs_tol=1e-4` is appropriate for LP optimization. |
+| V (Numerical Correctness) | ✅ Pass | HiGHS reference objective is computed from the same `Problem` JSON encoding — self-consistency check. Tolerance is exposed as named constant `CROSS_VALIDATION_ABS_TOL = 1e-4` with documented justification (see FR-005). |
 | Dev Workflow Step 0 | ✅ Pass | Branch `003-generate-synthetic-block` in use. `git merge origin/main` before every push. |
 
 **Post-Design Re-check**: No violations identified. `numpy` is a well-understood dependency

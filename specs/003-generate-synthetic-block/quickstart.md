@@ -69,8 +69,8 @@ print(f"Reference objective: {gp.reference_objective:.6f}")
 result = solve(gp.problem)
 print(f"DW objective:        {result.objective:.6f}")
 
-import math
-assert math.isclose(result.objective, gp.reference_objective, abs_tol=1e-4)
+from tests.synthetic import CROSS_VALIDATION_ABS_TOL
+assert abs(result.objective - gp.reference_objective) < CROSS_VALIDATION_ABS_TOL
 print("Match confirmed ✓")
 ```
 

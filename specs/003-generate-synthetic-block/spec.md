@@ -42,7 +42,7 @@ the float is the HiGHS reference objective. Call `solve(problem)` and assert the
 2. **Given** the same seed called twice, **When** the results are compared, **Then** the
    `Problem` and reference objective are bit-for-bit identical (determinism guaranteed).
 3. **Given** a generated `Problem`, **When** `dwsolver.solve()` is called, **Then** the returned
-   objective is within `abs_tol=1e-4` of the HiGHS reference.
+   objective is within `CROSS_VALIDATION_ABS_TOL` of the HiGHS reference.
 
 ---
 
@@ -96,7 +96,13 @@ readable.
   without modification and a `float` reference objective from HiGHS.
 - **FR-004**: The monolithic HiGHS form MUST be reconstructed solely from the data in
   the `Problem` — this verifies that the JSON encoding is self-consistent.
-- **FR-005**: The dwsolver and HiGHS objectives MUST agree within `abs_tol=1e-4`.
+- **FR-005**: The dwsolver and HiGHS objectives MUST agree within a named tolerance constant
+  `CROSS_VALIDATION_ABS_TOL: float = 1e-4` defined in `tests/synthetic.py`. Justification: all
+  generated variables are bounded `[0, 1]`, objective coefficients are drawn from `Uniform(−2, 2)`,
+  and constraint coefficients from `Uniform(−1, 1)` — the LP Lipschitz constant is small and
+  HiGHS solves to dual feasibility tolerance `1e-7`, making `1e-4` a conservative cross-validation
+  bound. This constant MUST be referenced by name in `test_synthetic.py`; raw literal `1e-4` is
+  forbidden.
 - **FR-006**: The parametrized suite MUST include exactly 12 seeds with documented
   structural shapes covering the diversity described in US2 scenario 3.
 - **FR-007**: The generator module MUST be importable as

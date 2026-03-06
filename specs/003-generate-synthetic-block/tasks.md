@@ -39,18 +39,18 @@ does not exist yet, so collection will raise `ImportError`.
 
 **Goal**: A developer calls `generate_problem(seed=42)`, gets a `GeneratedProblem` whose
 `reference_objective` came from HiGHS, then passes `gp.problem` to `dwsolver.solve()` and
-confirms the two objectives agree within `abs_tol=1e-4`.
+confirms the two objectives agree within `CROSS_VALIDATION_ABS_TOL`.
 
 **Independent Test**: `pytest tests/unit/test_synthetic.py -k test_cross_validate_single -v`
 → 1 item collected, PASS.
 
 ### Implementation for User Story 1
 
-- [ ] T003 [US1] Scaffold `tests/synthetic.py` — module docstring, imports (`dataclasses`, `numpy`, `highspy`, `dwsolver.models`), `SyntheticCase` dataclass, `GeneratedProblem` dataclass as specified in `specs/003-generate-synthetic-block/data-model.md`
+- [ ] T003 [US1] Scaffold `tests/synthetic.py` — module docstring, imports (`dataclasses`, `numpy`, `highspy`, `dwsolver.models`), `SyntheticCase` dataclass, `GeneratedProblem` dataclass as specified in `specs/003-generate-synthetic-block/data-model.md`; define `CROSS_VALIDATION_ABS_TOL: float = 1e-4` as a named module-level constant with an inline comment citing the mathematical justification from FR-005
 - [ ] T004 [P] [US1] Implement `solve_monolithic_highs(problem: Problem) -> float` in `tests/synthetic.py` — column-by-column + row-by-row HiGHS build using `_col_offsets` helper, sense map `{"<=": (-inf, rhs), ">=": (rhs, +inf), "=": (rhs, rhs)}`, `h.run()`, assert `kOptimal`, return `h.getInfoValue("primal_objective_value")[1]`
 - [ ] T005 [US1] Implement `generate_problem(seed, num_blocks=3, vars_per_block=10, local_constraints=5, master_constraints=2) -> GeneratedProblem` in `tests/synthetic.py` — full body: RNG init, variable names (`b{i}_x{j}`), objective coefficients, bounds (0,1), local constraint matrix with slack-from-`x*=0.5`, linking column COO with 2 link vars per block, master rows with slack, assemble `Problem.model_validate()`, call `solve_monolithic_highs`, return `GeneratedProblem`
 - [ ] T006 [US1] Add `if __name__ == "__main__"` CLI block to `tests/synthetic.py` — `argparse` with `--seed` (required int) and `--output` (optional path), call `generate_problem`, optionally write `gp.problem.model_dump_json()` to `--output`, print reference objective to stdout (satisfies SC-006: `python tests/synthetic.py --seed 42 --output /tmp/out.json`)
-- [ ] T007 [US1] Update `tests/unit/test_synthetic.py` — complete the skeleton so `test_cross_validate_single` generates `seed=42`, solves via `dwsolver.solver.solve(gp.problem)`, asserts status `OPTIMAL`, and asserts `abs(dw_obj - gp.reference_objective) < 1e-4`
+- [ ] T007 [US1] Update `tests/unit/test_synthetic.py` — complete the skeleton so `test_cross_validate_single` generates `seed=42`, solves via `dwsolver.solver.solve(gp.problem)`, asserts status `OPTIMAL`, and asserts `abs(dw_obj - gp.reference_objective) < CROSS_VALIDATION_ABS_TOL` (import the constant from `tests.synthetic`; never use the raw literal `1e-4`)
 
 **Checkpoint**: `pytest tests/unit/test_synthetic.py -k test_cross_validate_single -v` → 1 collected,
 PASS. `python tests/synthetic.py --seed 42` prints a finite float and exits 0.
