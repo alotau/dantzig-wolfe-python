@@ -38,9 +38,7 @@ from urllib.request import urlopen
 # Constants
 # ---------------------------------------------------------------------------
 
-CPLEX_BASE_URL = (
-    "https://raw.githubusercontent.com/alotau/dwsolver/master/examples/four_sea/"
-)
+CPLEX_BASE_URL = "https://raw.githubusercontent.com/alotau/dwsolver/master/examples/four_sea/"
 
 SUBPROB_FILES = [
     ("block_1", "subprob_1.cplex"),
@@ -104,10 +102,7 @@ def _split_constraint_blocks(section_text: str) -> list[str]:
     Splits at every line that starts with an identifier followed by ':'.
     """
     # Find positions of constraint name lines: identifier(possibly with parens):
-    starts = [
-        m.start()
-        for m in re.finditer(r"(?m)^\s*\w[\w,.()\s]*?:", section_text)
-    ]
+    starts = [m.start() for m in re.finditer(r"(?m)^\s*\w[\w,.()\s]*?:", section_text)]
     if not starts:
         return []
     blocks = []
@@ -161,7 +156,7 @@ def parse_master(text: str) -> dict:
         if not name_m:
             continue
         cname = name_m.group(1).strip()
-        body = block[name_m.end():]
+        body = block[name_m.end() :]
 
         # Find sense and RHS (last occurrence of sense+number)
         sense_m = re.search(r"(<=|>=|=)\s*(-?\d+(?:\.\d+)?)\s*$", body.replace("\n", " "))
@@ -266,7 +261,7 @@ def parse_subproblem_constraints(text: str, var_index: dict) -> dict:
         if not name_m:
             continue
         cname = name_m.group(1).strip()
-        body = block[name_m.end():]
+        body = block[name_m.end() :]
 
         sense_m = re.search(r"(<=|>=|=)\s*(-?\d+(?:\.\d+)?)\s*$", body.replace("\n", " "))
         if not sense_m:
