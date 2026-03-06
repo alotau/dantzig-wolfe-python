@@ -1,15 +1,16 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 2.0.1 → 2.0.2 (PATCH: added explicit branch-discipline step to Development
-Workflow — direct pushes to main are already forbidden per CI/CD section; this makes the
-rule unambiguous for both humans and AI agents executing implementation tasks)
-Previous: 2.0.0 → 2.0.1 (PATCH: corrected Principle II protocol line — "stdout" changed to "designated output file (not stdout)" to match FR-005 and all Gherkin scenarios)
+Version change: 2.0.2 → 2.0.3 (PATCH: added "keep branches current" rule to Development
+Workflow step 0 — feature branches MUST merge from origin/main before every push to remote;
+conflicts MUST be resolved locally. Motivated by CI failures caused by diverged branches.)
+Previous: 2.0.1 → 2.0.2 (PATCH: added explicit branch-discipline step 0 to Development Workflow)
+Previous: 2.0.0 → 2.0.1 (PATCH: corrected Principle II protocol line — stdout → designated output file)
 Modified principles: N/A
-Added sections: Development Workflow — step 0 (branch discipline)
+Added sections: Development Workflow step 0 — "keep branches current" sub-rule
 Removed sections: N/A
 Templates requiring updates:
-  - .specify/templates/tasks-template.md  — consider noting branch requirement in task preamble
+  - .specify/templates/tasks-template.md  ✅ no structural change required; rule is self-contained under step 0
 Follow-up TODOs: enforce branch protection rules on GitHub to block pushes to main at the remote.
 -->
 
@@ -103,6 +104,13 @@ forbidden. All changes arrive via pull requests.
    Direct commits or pushes to `main` — by humans or AI agents — are **forbidden**.
    This applies at every step: setup, implementation, polish, and hotfixes alike.
 
+   **Keep branches current (NON-NEGOTIABLE)** — before every `git push` to the remote
+   feature branch, MUST run `git fetch origin && git merge origin/main --no-edit` to
+   incorporate any changes that have landed on `main`. Merge conflicts MUST be resolved
+   locally before pushing. Rationale: keeps the integration surface small, prevents CI
+   failures caused by diverged branches, and ensures reviewers see diffs against a
+   current baseline.
+
 1. **Spec first** — new capabilities begin with a feature spec (`/speckit.spec`)
    before any code is written.
 2. **Plan before build** — an implementation plan (`/speckit.plan`) is produced
@@ -144,4 +152,4 @@ document prevails.
 **Compliance review**: Every PR reviewer MUST check compliance with this
 constitution. Non-compliance blocks merge, same as a failing test.
 
-**Version**: 2.0.2 | **Ratified**: 2026-03-03 | **Last Amended**: 2026-03-04
+**Version**: 2.0.3 | **Ratified**: 2026-03-03 | **Last Amended**: 2026-03-05
