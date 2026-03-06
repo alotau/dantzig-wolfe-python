@@ -314,9 +314,6 @@ class TestSingleBlockEdgeCase:
 class TestSC001Regression:
     """SC-001: solver must classify all reference fixtures correctly and match
     known optimal objective values and variable assignments.
-
-    ref_four_sea.json is deliberately excluded — it is a placeholder fixture
-    with TODO status and does not yet contain the full LP encoding.
     """
 
     def test_ref_book_bertsimas(self) -> None:
@@ -369,3 +366,15 @@ class TestSC001Regression:
         assert math.isclose(result.variable_values["x1"], 3.0, abs_tol=0.01)
         assert math.isclose(result.variable_values["x2"], 2.0, abs_tol=0.01)
         assert math.isclose(result.variable_values["x3"], 3.0, abs_tol=0.01)
+
+    def test_ref_four_sea(self) -> None:
+        """four_sea LAS→SEA air-traffic LP: 8 aircraft, 4 D-W blocks, known opt 12.0.
+
+        The +160 objective constant (CPLEX comment) is encoded as a fixed
+        dummy variable in block_1; without it the LP variable-part optimum
+        is -148.0, giving the correct business objective 12.0 = 160 + (-148).
+        """
+        result = solve(Problem.from_file(FIXTURES / "ref_four_sea.json"))
+        assert result.status == SolveStatus.OPTIMAL
+        assert result.objective is not None
+        assert math.isclose(result.objective, 12.0, abs_tol=0.01)

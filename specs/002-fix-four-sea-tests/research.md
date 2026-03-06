@@ -52,14 +52,25 @@ https://raw.githubusercontent.com/alotau/dwsolver/master/examples/four_sea/
 
 ## Decision 3: Objective Handling
 
-**Decision**: Encode the objective entirely within block-level `objective` coefficient
-vectors. The master-level constant term (+160) is dropped from the encoded fixture
-because it is an additive constant that does not affect the optimal solution or
-verification (the solver minimizes the variable-dependent terms only).
+**Decision**: Encode the +160 objective constant via a fixed **dummy variable**
+`__objective_constant__` injected into `block_1` with `lower=1.0, upper=1.0` and
+`objective_coeff=160.0`. This forces the solver to always include +160 in the
+reported total, yielding 12.0 = −148 + 160.
 
-**Rationale**: The `dwsolver` JSON schema has no `constant` field in the master or
-blocks. The known optimal objective `12.0` refers to the _total delay_ (variable
-part), not 160 + 12. The `ref_four_sea.expected.json` already uses `12.0`.
+**Rationale**: The `dwsolver` JSON schema has no `constant` field. The master CPLEX
+file contains `\* constant term = 160 *\` as a comment for the Delay_Costs
+objective. Without encoding it, the LP variable-part optimum is −148.0, not 12.0.
+A fixed-bounds dummy variable in a D-W block is always selected at its fixed value
+(since sum(λ) = 1 and the dummy has zero linking), so the constant is recovered.
+
+**Dummy variable spec**:
+```
+variable_names:  append "__objective_constant__" to block_1
+Objective coeff: +160.0
+bounds:          {"lower": 1.0, "upper": 1.0}   (fixed at 1)
+constraints row: all zeros (no local constraints)
+linking_columns: no entries (zero coupling)
+```
 
 **Master objective pattern per aircraft AC_k**:
 - `+1` coefficient on every `w(AC_k, LAS, t)` for t = 20..39 (20 terms per aircraft)
@@ -84,22 +95,21 @@ achieved at the LP relaxation vertex.
 
 ## Finding: Master Problem Structure
 
-**13 Arrival_Rate coupling constraints**, all `<= 7`.
+**2 Arrival_Rate coupling constraints**, both `<= 7`.
 
-Each constraint `Arrival_Rate(SEA, j)` for j = 1..13 has the form:
-```
-sum_{k=1}^{8}  [ -w(AC_k, SEA, t_start_j) + w(AC_k, SEA, t_end_j) ]  <= 7
-```
+Despite the `examples/four_sea/` directory containing comments that suggest a larger
+horizon, the actual `master.cplex` Subject To section contains exactly two rows:
+- `Arrival_Rate(SEA,13)` (row index 0): `<= 7`
+- `Arrival_Rate(SEA,14)` (row index 1): `<= 7`
 
-The windows `(t_start_j, t_end_j)` slide across the SEA arrival horizon t = 199..218.
-Exact window boundaries are read deterministically from the CPLEX file by the
-converter — they do not need to be enumerated here.
+Each constraint references 2 aircraft per subproblem block with coefficients −1 or +1
+on 2 SEA variables.
 
-**Linking variable dimension**:
-- Per aircraft: 20 SEA variables (t=199..218), each with coefficient −1 or +1 in
-  each of the 13 constraints.
-- Per block (2 aircraft): up to 2 × 20 × 2 = **80 COO entries** in `linking_columns`
-  per master constraint (40 with coeff −1, 40 with coeff +1).
+**Linking variable dimension** (per block of 2 aircraft):
+- Each constraint touches 2 aircraft × 2 SEA vars = **4 COO entries** per constraint
+- **Total per block**: 2 constraints × ~3 entries = **6 COO entries** in `linking_columns`
+  (exact count depends on which of the 2 aircraft in a block appear in each constraint
+  row; confirmed at 6 from the generated fixture)
 
 ---
 
@@ -122,6 +132,10 @@ Sectors: **11 per aircraft**
    `w(AC, next_sector, t+offset) - w(AC, current_sector, t) <= 0`  
    sense `<=`, RHS `0`
 
+**Variable source**: variables are declared in the `Bounds` section of each subproblem
+file as `0 <= w(aircraft,sector,t) <= 1` — one line per variable. The `Subject To`
+section only references variables; it does not declare them.
+
 **Constraint count**: ~1,760 per subproblem (confirmed by structure; exact count is
 parsed by the converter).
 
@@ -130,17 +144,23 @@ parsed by the converter).
 ## Finding: Block-to-Master Linking
 
 **Linking variables** (variables appearing in master coupling constraints):
-- `w(AC_k, SEA, t)` for t = 199..218 → appear in `Arrival_Rate(SEA, j)` constraints
+- `w(AC_k, SEA, t)` for specific time steps appear in `Arrival_Rate(SEA, j)` constraints
 
 **Non-linking variables** (subproblem-local only):
-- `w(AC_k, LAS, t)` — appear in the objective but NOT in any `Arrival_Rate` constraint
+- `w(AC_k, LAS, t)` — appear in the master objective but NOT in any `Arrival_Rate` constraint
 - All intermediate sector variables (ZLA16, ZOA46, ..., ZSESEA) — purely local
+
+**Objective source**: the subproblem CPLEX files have **no objective section**. The
+master `Minimize` section contains coefficients for all 8 aircraft interleaved. Each
+block's `objective` array is built by looking up each block variable in the master
+objective dict (0.0 for variables absent from the master objective).
 
 **D_i matrix structure** (COO encoding for block i):
 - Rows: master constraint index 0..12 (for each Arrival_Rate(SEA,j))
-- Cols: index of `w(AC_k, SEA, t_start)` or `w(AC_k, SEA, t_end)` in the block's
-  `variable_names` list
-- Values: −1 for t_start variables, +1 for t_end variables
+- Cols: index of the linking variable in the block's `variable_names` list
+- Values: coefficient as given in the master constraint row (−1 or +1)
+- Source: the `Subject To` section of `master.cplex` lists the linking variables
+  explicitly per constraint; filter to those present in the block's `var_index`
 
 ---
 
