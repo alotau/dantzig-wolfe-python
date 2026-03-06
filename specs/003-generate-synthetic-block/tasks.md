@@ -50,10 +50,12 @@ confirms the two objectives agree within `CROSS_VALIDATION_ABS_TOL`.
 - [ ] T004 [P] [US1] Implement `solve_monolithic_highs(problem: Problem) -> float` in `tests/synthetic.py` — column-by-column + row-by-row HiGHS build using `_col_offsets` helper, sense map `{"<=": (-inf, rhs), ">=": (rhs, +inf), "=": (rhs, rhs)}`, `h.run()`, assert `kOptimal`, return `h.getInfoValue("primal_objective_value")[1]`
 - [ ] T005 [US1] Implement `generate_problem(seed, num_blocks=3, vars_per_block=10, local_constraints=5, master_constraints=2) -> GeneratedProblem` in `tests/synthetic.py` — full body: RNG init, variable names (`b{i}_x{j}`), objective coefficients, bounds (0,1), local constraint matrix with slack-from-`x*=0.5`, linking column COO with 2 link vars per block, master rows with slack, assemble `Problem.model_validate()`, call `solve_monolithic_highs`, return `GeneratedProblem`
 - [ ] T006 [US1] Add `if __name__ == "__main__"` CLI block to `tests/synthetic.py` — `argparse` with `--seed` (required int) and `--output` (optional path), call `generate_problem`, optionally write `gp.problem.model_dump_json()` to `--output`, print reference objective to stdout (satisfies SC-006: `python tests/synthetic.py --seed 42 --output /tmp/out.json`)
+- [ ] T006a [P] [US1] Add `test_cli_smoke` to `tests/unit/test_synthetic.py` — use `subprocess.run([sys.executable, "tests/synthetic.py", "--seed", "42", "--output", str(tmp_path / "out.json")], capture_output=True, check=True)` via `pytest`'s `tmp_path` fixture; assert return code 0; assert stdout line contains a parseable finite float; load the written file and call `Problem.model_validate_json()` on its contents without error (SC-006)
 - [ ] T007 [US1] Update `tests/unit/test_synthetic.py` — complete the skeleton so `test_cross_validate_single` generates `seed=42`, solves via `dwsolver.solver.solve(gp.problem)`, asserts status `OPTIMAL`, and asserts `abs(dw_obj - gp.reference_objective) < CROSS_VALIDATION_ABS_TOL` (import the constant from `tests.synthetic`; never use the raw literal `1e-4`)
+- [ ] T007a [P] [US1] Add `test_determinism` to `tests/unit/test_synthetic.py` — call `generate_problem(seed=1)` twice, assert `gp1.reference_objective == gp2.reference_objective` and `gp1.problem.model_dump() == gp2.problem.model_dump()`; this verifies US1 acceptance scenario 2 (bit-for-bit reproducibility within the same numpy major version)
 
-**Checkpoint**: `pytest tests/unit/test_synthetic.py -k test_cross_validate_single -v` → 1 collected,
-PASS. `python tests/synthetic.py --seed 42` prints a finite float and exits 0.
+**Checkpoint**: `pytest tests/unit/test_synthetic.py -k 'test_cross_validate_single or test_cli_smoke or test_determinism' -v` → 3 collected, all PASS.
+`python tests/synthetic.py --seed 42` prints a finite float and exits 0.
 
 ---
 
@@ -82,37 +84,41 @@ implicitly verified by `Problem.model_validate()` inside `generate_problem`.
 
 - [ ] T011 [P] Run `mypy --strict tests/synthetic.py` and fix any type errors — add `npt.NDArray[np.float64]` annotations for numpy arrays; ensure `SyntheticCase` and `GeneratedProblem` have complete type hints; no `type: ignore` comments unless unavoidable
 - [ ] T012 [P] Run `ruff check --fix tests/synthetic.py tests/unit/test_synthetic.py` then `ruff format tests/synthetic.py tests/unit/test_synthetic.py` — zero lint errors, consistent formatting
-- [ ] T013 Run full `pytest tests/ -v` and confirm all tests pass (existing 121 + 12 new = 133 total); no regressions in `tests/unit/` or `tests/bdd/`
+- [ ] T013 Run full `pytest tests/ -v` and confirm all tests pass (existing 121 + 12 parametrized + 3 US1 tests = 136 total); no regressions in `tests/unit/` or `tests/bdd/`
 
 ---
 
 ## Dependencies
 
 ```
-T001 → T002 → T003 → T004 (parallel with T005) → T005 → T006 → T007
-                                                               ↓
-                                                  T008 (parallel) → T009 → T010
-                                                               ↓
-                                               T011 (parallel) + T012 (parallel) → T013
+T001 → T002 → T003 → T004 (parallel with T005) → T005 → T006 ─┬─ T006a (parallel)
+                                                                 └─ T007  ─┬─ T007a (parallel)
+                                                                            │
+                                                               T008 (parallel) → T009 → T010
+                                                                            │
+                                                           T011 (parallel) + T012 (parallel) → T013
 ```
 
 **Story completion order**:
-- US1 (P1): T001 → T002 → T003 → T004+T005 → T006 → T007 — independently testable
+- US1 (P1): T001 → T002 → T003 → T004+T005 → T006 → T006a+T007 → T007a — independently testable
 - US2 (P2): US1 complete → T008 → T009 → T010 — independently testable
 - Polish: US2 complete → T011+T012 → T013
 
 **Parallel opportunities per story**:
 - T004 and T005 can be implemented in the same pass (different functions, no mutual dependency)
-- T008 (`SYNTHETIC_CASES` constant) can start while T007 (US1 test) is being verified
+- T006a (CLI smoke) and T007 (cross-validate test) depend only on T006/T005 respectively — can be written in parallel
+- T007a (determinism) depends only on T005 — can be written alongside T007
+- T008 (`SYNTHETIC_CASES` constant) can start while T007/T007a are being verified
 - T011 (mypy) and T012 (ruff) are fully independent
 
 ---
 
 ## Implementation Strategy
 
-**Suggested MVP scope**: Phase 1 + Phase 2 + Phase 3 (T001–T007) — US1 only.
-This delivers a working generator, verified reference objective, and one passing cross-validation
-test. US2 (T008–T010) is additive parametrization with no new algorithmic complexity.
+**Suggested MVP scope**: Phase 1 + Phase 2 + Phase 3 (T001–T007a) — US1 only.
+This delivers a working generator, verified reference objective, one passing cross-validation
+test, a CLI smoke-test, and a determinism assertion. US2 (T008–T010) is additive parametrization
+with no new algorithmic complexity.
 
 **Key invariants to preserve**:
 - All random values in `generate_problem` from a single `numpy.random.default_rng(seed)` instance
