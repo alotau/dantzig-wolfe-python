@@ -1,104 +1,97 @@
-# Implementation Plan: [FEATURE]
+# Implementation Plan: Replace four_sea Placeholder Test Fixture
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
-
-**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
+**Branch**: `002-fix-four-sea-tests` | **Date**: 2026-03-04 | **Spec**: [spec.md](spec.md)
+**Input**: Feature specification from `specs/002-fix-four-sea-tests/spec.md`
 
 ## Summary
 
-[Extract from feature spec: primary requirement + technical approach from research]
+Replace `tests/fixtures/ref_four_sea.json` (currently a placeholder) with a complete,
+machine-generated JSON encoding of the four_sea Dantzig-Wolfe LP by writing a
+standalone Python converter script (`cplex_to_json.py`) that fetches the five reference
+CPLEX files from `alotau/dwsolver`, parses them, and emits a fixture that causes the
+solver to return `objective: 12.0`.
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
-
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: Python 3.11+  
+**Primary Dependencies**: stdlib only — `urllib.request`, `re`, `json`, `argparse`  
+**Storage**: N/A (reads remote HTTPS; writes one JSON file)  
+**Testing**: pytest (existing suite); no new tests for the converter itself  
+**Target Platform**: developer workstation (macOS/Linux); not shipped  
+**Project Type**: dev tool (one-off script, lives in `specs/` not `src/`)  
+**Performance Goals**: completes in <60s on a standard connection  
+**Constraints**: no third-party packages; deterministic output (bit-for-bit identical runs)  
+**Scale/Scope**: 5 input files; ~1,760 constraints × 4 blocks; ~440 vars × 4 blocks
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-
-[Gates determined based on constitution file]
+| Principle | Status | Notes |
+|-----------|--------|-------|
+| I (Library-First) | ✅ Pass | Converter is a dev tool in `specs/`, not a library module |
+| II (CLI Interface) | ✅ Pass | No changes to the CLI layer |
+| III (TDD) | ✅ Pass | Existing `ref_four_sea` regression test (spec 001) is the failing test being fulfilled; T002 documents baseline failure before implementation |
+| IV (Parallel by Design) | ✅ Pass | No changes to subproblem dispatch |
+| V (Numerical Correctness) | ✅ Pass | T014 verifies `objective: 12.0` against `ref_four_sea.expected.json` |
+| Dev Workflow Step 0 (Branch) | ✅ Pass | `002-fix-four-sea-tests` branch in use |
 
 ## Project Structure
 
 ### Documentation (this feature)
 
 ```text
-specs/[###-feature]/
-├── plan.md              # This file (/speckit.plan command output)
-├── research.md          # Phase 0 output (/speckit.plan command)
-├── data-model.md        # Phase 1 output (/speckit.plan command)
-├── quickstart.md        # Phase 1 output (/speckit.plan command)
-├── contracts/           # Phase 1 output (/speckit.plan command)
-└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
+specs/002-fix-four-sea-tests/
+├── plan.md        ← this file
+├── spec.md
+├── research.md
+├── data-model.md
+├── quickstart.md
+├── tasks.md
+└── tools/
+    └── cplex_to_json.py   ← NEW: converter script (dev tool, not shipped)
 ```
 
-### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
+### Affected repository files
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
-
 tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+└── fixtures/
+    └── ref_four_sea.json  ← MODIFIED: placeholder replaced with complete LP encoding
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+No changes to `src/dwsolver/` or `tests/bdd/` or `tests/unit/`.
 
-## Complexity Tracking
+## Converter Algorithm
 
-> **Fill ONLY if Constitution Check has violations that must be justified**
+The converter is a single Python script. Execution order:
 
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+1. **Fetch** `master.cplex` and `subprob_1..4.cplex` via HTTPS from `alotau/dwsolver`
+
+2. **Parse `master.cplex`**:
+   - `Minimize` section → `master_obj: dict[str, float]` mapping variable name to coefficient (−2 for SEA vars, +1 for LAS vars, across all 8 aircraft)
+   - `Subject To` section → 13 `Arrival_Rate(SEA,j)` rows:
+     - `constraint_names: list[str]`
+     - `rhs: list[float]` — all 7.0
+     - `senses: list[str]` — all `"L"`
+     - `master_rows: list[dict[str, float]]` — per-constraint `{var_name: coeff}` sparse map (used for linking_columns)
+
+3. **For each `subprob_N.cplex`** (blocks 1–4):
+   - `Bounds` section → `variable_names: list[str]` (each `0 <= w(...) <= 1` line declares one variable); sort alphabetically for determinism
+   - Build `var_index: dict[str, int]` from sorted list
+   - `Subject To` section → parse each constraint line:
+     - Name: `Sector_Time(...)` or `Temporality(...)`
+     - Pattern: `VAR_A - VAR_B <= 0` or `VAR_A - VAR_B >= 0`
+     - All RHS = 0.0; senses are `"L"` (Sector_Time) or `"G"` (Temporality)
+     - Build sparse matrix COO: `(row_idx, col_idx, value)` per non-zero
+   - Objective: for each var in `variable_names`, look up in `master_obj` dict (0.0 if absent)
+   - `linking_columns`: for each of the 13 `master_rows`, filter entries to vars present in this block's `var_index` → emit `(master_row_idx, var_index[var_name], coeff)` COO triplets
+
+4. **Assemble** top-level `Problem` dict matching `dwsolver` schema and write to `--output` path with `json.dumps(sort_keys=True, indent=2)`
+
+## Key Decisions (from research.md)
+
+| # | Decision |
+|---|----------|
+| 1 | Standalone Python script; no CPLEX SDK or scipy |
+| 2 | HTTPS fetch from `raw.githubusercontent.com/alotau/dwsolver/master/examples/four_sea/` |
+| 3 | Drop master `+160` constant; `objective: 12.0` is the variable-part optimum |
+| 4 | Ignore `GENERALS` section; all bounds are `[0.0, 1.0]` (LP relaxation) |

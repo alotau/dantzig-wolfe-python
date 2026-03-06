@@ -35,6 +35,9 @@ htmlcov/
 .coverage
 coverage.xml
 
+# dwsolver solver output artifacts
+*.solution.json
+
 # macOS
 .DS_Store
 .AppleDouble
