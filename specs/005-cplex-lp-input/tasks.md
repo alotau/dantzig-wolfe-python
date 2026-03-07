@@ -12,8 +12,8 @@
 
 **Purpose**: Fixture files and Gherkin specification in place before any code changes.
 
-- [ ] T001 Download four_sea CPLEX LP files (master.cplex, subprob_1–4.cplex) from alotau/dwsolver and store as static fixtures in `tests/fixtures/four_sea/`
-- [ ] T002 [P] Write Gherkin feature file `specs/001-gherkin-bdd-specs/features/cplex_lp_usage.feature` covering all US1 acceptance scenarios (LP files CLI, backward compat JSON, .cplex extension, --format lp, --output flag)
+- [X] T001 Download four_sea CPLEX LP files (master.cplex, subprob_1–4.cplex) from alotau/dwsolver and store as static fixtures in `tests/fixtures/four_sea/`
+- [X] T002 [P] Write Gherkin feature file `specs/001-gherkin-bdd-specs/features/cplex_lp_usage.feature` covering all US1 acceptance scenarios (LP files CLI, backward compat JSON, .cplex extension, --format lp, --output flag)
 
 ---
 
@@ -23,7 +23,7 @@
 
 **⚠️ CRITICAL**: No user story work can begin until T003 is complete.
 
-- [ ] T003 Create `src/dwsolver/lp_parser.py` with `MasterLP`, `SubproblemLP`, `LinkingSpec` dataclasses and stub functions (`parse_master`, `parse_subproblem`, `infer_linking`, `resolve_block_objective`, `assemble_problem`, `load_problem_from_lp`) — all stubs raise `NotImplementedError`
+- [X] T003 Create `src/dwsolver/lp_parser.py` with `MasterLP`, `SubproblemLP`, `LinkingSpec` dataclasses and stub functions (`parse_master`, `parse_subproblem`, `infer_linking`, `resolve_block_objective`, `assemble_problem`, `load_problem_from_lp`) — all stubs raise `NotImplementedError`
 
 **Checkpoint**: Foundation ready — US1, US2, and US3 test tasks can now be written in parallel.
 
@@ -37,17 +37,17 @@
 
 ### Tests for User Story 1 ⚠️ Write and confirm FAIL before implementing T006–T011
 
-- [ ] T004 [P] [US1] Write unit tests for `parse_master()`, `parse_subproblem()`, `infer_linking()`, `resolve_block_objective()` in `tests/unit/test_lp_parser.py` covering four_sea master (constraint count, objective coefficients, constant term) and a `parse_subproblem()` case with a `Generals` section present verifying it is silently ignored (FR-009) — confirm FAIL
-- [ ] T005 [P] [US1] Write BDD step implementations in `tests/bdd/steps/test_cplex_lp_usage.py` wiring `specs/001-gherkin-bdd-specs/features/cplex_lp_usage.feature` scenarios — confirm FAIL
+- [X] T004 [P] [US1] Write unit tests for `parse_master()`, `parse_subproblem()`, `infer_linking()`, `resolve_block_objective()` in `tests/unit/test_lp_parser.py` covering four_sea master (constraint count, objective coefficients, constant term) and a `parse_subproblem()` case with a `Generals` section present verifying it is silently ignored (FR-009) — confirm FAIL
+- [X] T005 [P] [US1] Write BDD step implementations in `tests/bdd/steps/test_cplex_lp_usage.py` wiring `specs/001-gherkin-bdd-specs/features/cplex_lp_usage.feature` scenarios — confirm FAIL
 
 ### Implementation for User Story 1
 
-- [ ] T006 [US1] Implement `parse_master()` in `src/dwsolver/lp_parser.py` — section extraction (Minimize/Maximize direction, Subject To constraints, `\* constant term = N *\` comment → `obj_constant`)
-- [ ] T007 [P] [US1] Implement `parse_subproblem()` in `src/dwsolver/lp_parser.py` — Bounds section variable discovery (all four bound formats), local constraints dense matrix, objective section extraction
-- [ ] T008 [US1] Implement `infer_linking()` in `src/dwsolver/lp_parser.py` — match subproblem `var_index` against `master.row_coefficients` to emit sparse COO `LinkingSpec`
-- [ ] T009 [US1] Implement `resolve_block_objective()` in `src/dwsolver/lp_parser.py` — subproblem-first then master-fallback strategy
-- [ ] T010 [US1] Implement `assemble_problem()` and `load_problem_from_lp()` in `src/dwsolver/lp_parser.py` — objective constant injection into block 0, `Problem.model_validate()` call
-- [ ] T011 [US1] Update `src/dwsolver/cli.py` — replace `PROBLEM_FILE` with `FILES` (`nargs=-1`), add `--format lp|json` option, implement format detection logic (extension → mode → load)
+- [X] T006 [US1] Implement `parse_master()` in `src/dwsolver/lp_parser.py` — section extraction (Minimize/Maximize direction, Subject To constraints, `\* constant term = N *\` comment → `obj_constant`)
+- [X] T007 [P] [US1] Implement `parse_subproblem()` in `src/dwsolver/lp_parser.py` — Bounds section variable discovery (all four bound formats), local constraints dense matrix, objective section extraction
+- [X] T008 [US1] Implement `infer_linking()` in `src/dwsolver/lp_parser.py` — match subproblem `var_index` against `master.row_coefficients` to emit sparse COO `LinkingSpec`
+- [X] T009 [US1] Implement `resolve_block_objective()` in `src/dwsolver/lp_parser.py` — subproblem-first then master-fallback strategy
+- [X] T010 [US1] Implement `assemble_problem()` and `load_problem_from_lp()` in `src/dwsolver/lp_parser.py` — objective constant injection into block 0, `Problem.model_validate()` call
+- [X] T011 [US1] Update `src/dwsolver/cli.py` — replace `PROBLEM_FILE` with `FILES` (`nargs=-1`), add `--format lp|json` option, implement format detection logic (extension → mode → load)
 
 **Checkpoint**: `dwsolver master.cplex sub1.cplex … sub4.cplex` solves four_sea and produces `objective == 12.0`. All BDD and unit tests for US1 GREEN.
 
@@ -61,13 +61,13 @@
 
 ### Tests for User Story 2 ⚠️ Write and confirm FAIL before implementing T013–T015
 
-- [ ] T012 [US2] Write unit tests for `Problem.from_lp()` and `Problem.from_lp_text()` (happy path, four_sea regression, from-text equivalence; cross-format assertion: load four_sea via `Problem.from_file()` with JSON fixture and via `Problem.from_lp()` with CPLEX fixtures and assert `abs(lp_objective - json_objective) < 1e-6`, satisfying SC-002) in `tests/unit/test_lp_parser.py` — confirm FAIL
+- [X] T012 [US2] Write unit tests for `Problem.from_lp()` and `Problem.from_lp_text()` (happy path, four_sea regression, from-text equivalence; cross-format assertion: load four_sea via `Problem.from_file()` with JSON fixture and via `Problem.from_lp()` with CPLEX fixtures and assert `abs(lp_objective - json_objective) < 1e-6`, satisfying SC-002) in `tests/unit/test_lp_parser.py` — confirm FAIL
 
 ### Implementation for User Story 2
 
-- [ ] T013 [US2] Add `Problem.from_lp(master_path, subproblem_paths)` class method in `src/dwsolver/models.py` — delegates to `load_problem_from_lp()` from `lp_parser`
-- [ ] T014 [US2] Add `Problem.from_lp_text(master_text, subproblem_texts)` class method in `src/dwsolver/models.py` — parses from strings, no file I/O
-- [ ] T015 [US2] Update `src/dwsolver/__init__.py` docstring to document `Problem.from_lp` and `Problem.from_lp_text` in the public API comment header (depends on T013, T014)
+- [X] T013 [US2] Add `Problem.from_lp(master_path, subproblem_paths)` class method in `src/dwsolver/models.py` — delegates to `load_problem_from_lp()` from `lp_parser`
+- [X] T014 [US2] Add `Problem.from_lp_text(master_text, subproblem_texts)` class method in `src/dwsolver/models.py` — parses from strings, no file I/O
+- [X] T015 [US2] Update `src/dwsolver/__init__.py` docstring to document `Problem.from_lp` and `Problem.from_lp_text` in the public API comment header (depends on T013, T014)
 
 **Checkpoint**: `Problem.from_lp()` and `Problem.from_lp_text()` callable from Python, four_sea yields `objective == 12.0`. All US2 tests GREEN.
 
@@ -83,14 +83,14 @@
 
 ### Tests for User Story 3 ⚠️ Write and confirm FAIL before implementing T017–T020
 
-- [ ] T016 [US3] Write unit tests for all `DWSolverInputError` error paths (missing file, empty Subject To, no Bounds variables, duplicate variable across blocks, single LP with no subproblems, unknown --format, master coupling-constraint variable not declared in any subproblem Bounds) in `tests/unit/test_lp_parser.py` — confirm FAIL
+- [X] T016 [US3] Write unit tests for all `DWSolverInputError` error paths (missing file, empty Subject To, no Bounds variables, duplicate variable across blocks, single LP with no subproblems, unknown --format, master coupling-constraint variable not declared in any subproblem Bounds) in `tests/unit/test_lp_parser.py` — confirm FAIL
 
 ### Implementation for User Story 3
 
-- [ ] T017 [US3] Implement `DWSolverInputError` raises in `parse_master()` in `src/dwsolver/lp_parser.py` — no `Subject To` section found, zero constraints parsed
-- [ ] T018 [P] [US3] Implement `DWSolverInputError` raises in `parse_subproblem()` in `src/dwsolver/lp_parser.py` — no `Bounds` section, zero variables declared
-- [ ] T019 [US3] Implement `DWSolverInputError` raises in `assemble_problem()` in `src/dwsolver/lp_parser.py` — empty `subs` list, duplicate variable name across blocks, master coupling-constraint variable not declared in any subproblem Bounds section
-- [ ] T020 [US3] Implement CLI error handling in `src/dwsolver/cli.py` — file-not-found for any LP file, unknown `--format` value, single LP file with no subproblems and no `--format json`, extra files in JSON mode
+- [X] T017 [US3] Implement `DWSolverInputError` raises in `parse_master()` in `src/dwsolver/lp_parser.py` — no `Subject To` section found, zero constraints parsed
+- [X] T018 [P] [US3] Implement `DWSolverInputError` raises in `parse_subproblem()` in `src/dwsolver/lp_parser.py` — no `Bounds` section, zero variables declared
+- [X] T019 [US3] Implement `DWSolverInputError` raises in `assemble_problem()` in `src/dwsolver/lp_parser.py` — empty `subs` list, duplicate variable name across blocks, master coupling-constraint variable not declared in any subproblem Bounds section
+- [X] T020 [US3] Implement CLI error handling in `src/dwsolver/cli.py` — file-not-found for any LP file, unknown `--format` value, single LP file with no subproblems and no `--format json`, extra files in JSON mode
 
 **Checkpoint**: All US3 error paths raise `DWSolverInputError` / non-zero CLI exit. All US3 tests GREEN.
 
@@ -100,9 +100,9 @@
 
 **Purpose**: Type correctness, lint compliance, and full regression confirmation.
 
-- [ ] T021 [P] Fix all mypy strict errors in `src/dwsolver/lp_parser.py`, `src/dwsolver/models.py`, `src/dwsolver/cli.py` (`mypy --strict src/dwsolver/`)
-- [ ] T022 [P] Fix all ruff lint and format violations in `src/dwsolver/lp_parser.py`, `src/dwsolver/models.py`, `src/dwsolver/cli.py` (`ruff check src/ && ruff format src/`)
-- [ ] T023 Run full test suite (`pytest tests/`) and confirm all unit + BDD tests pass with zero regressions against pre-005 baseline
+- [X] T021 [P] Fix all mypy strict errors in `src/dwsolver/lp_parser.py`, `src/dwsolver/models.py`, `src/dwsolver/cli.py` (`mypy --strict src/dwsolver/`)
+- [X] T022 [P] Fix all ruff lint and format violations in `src/dwsolver/lp_parser.py`, `src/dwsolver/models.py`, `src/dwsolver/cli.py` (`ruff check src/ && ruff format src/`)
+- [X] T023 Run full test suite (`pytest tests/`) and confirm all unit + BDD tests pass with zero regressions against pre-005 baseline
 
 ---
 
