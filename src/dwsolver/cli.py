@@ -97,6 +97,11 @@ def main(
     try:
         detected = _detect_format(files, fmt)
         if detected == "json":
+            if len(files) != 1:
+                raise DWSolverInputError(
+                    "JSON input requires exactly one problem file. "
+                    f"Received {len(files)} files: {', '.join(repr(f) for f in files)}."
+                )
             problem = Problem.from_file(files[0])
         else:
             problem = Problem.from_lp(files[0], list(files[1:]))
