@@ -137,6 +137,7 @@ Assemble a validated `Problem` from parsed intermediate objects.
 **Raises**: `DWSolverInputError` if:
 - `subs` is empty.
 - A variable name appears in more than one subproblem (duplicate variable across blocks).
+- A variable appearing in any master coupling constraint is not declared in any subproblem's `Bounds` section.
 - Pydantic validation fails (re-wrapped as `DWSolverInputError`).
 
 ---
@@ -169,6 +170,7 @@ Examples of required error message patterns:
 | Subproblem has no variables | `"Subproblem 'sub1.lp' (block_0): no variables declared in Bounds section"` |
 | Empty master constraints | `"Master file 'master.lp': no coupling constraints found in Subject To section"` |
 | Duplicate variable | `"Variable 'x1' appears in both 'sub1.lp' (block_0) and 'sub2.lp' (block_1)"` |
+| Master variable unassigned | `"Variable 'w(AC1_0,SEA,199)' appears in master coupling constraints but is not declared in any subproblem Bounds section"` |
 | Unknown `--format` value | `"Unknown format 'xyz'; accepted values: json, lp"` |
 
 ---

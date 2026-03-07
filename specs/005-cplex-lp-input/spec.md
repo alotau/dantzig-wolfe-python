@@ -2,7 +2,7 @@
 
 **Feature Branch**: `005-cplex-lp-input`  
 **Created**: 2026-03-06  
-**Status**: Draft  
+**Status**: Approved  
 **Input**: User description: "Add support for CPLEX LP format as an alternative input format alongside the existing JSON format. Users provide a master .lp file and one or more subproblem .lp files via CLI arguments or library API to solve Dantzig-Wolfe decomposition problems."
 
 ## User Scenarios & Testing *(mandatory)*
@@ -124,9 +124,10 @@ file created.
   honoured by negating the objective (consistent with the solver's minimisation
   convention).
 - **Variable in no subproblem**: A variable referenced in the master's coupling
-  constraints that does not appear in any subproblem's bounds section is silently
-  ignored in the linking (the master row coefficient for that variable contributes
-  zero to every block).
+  constraints that does not appear in any subproblem's `Bounds` section raises
+  `DWSolverInputError` identifying the offending variable name(s). Silent partial
+  zeroing of coupling constraints would alter the LP without notice, violating
+  SC-005 (no silent wrong answers).
 - **Comments and blank lines**: Lines beginning with `\` and blank lines are ignored
   in all sections.
 - **Coefficient-free terms**: A term with no explicit coefficient (e.g., `+ x1`)

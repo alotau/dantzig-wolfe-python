@@ -51,9 +51,11 @@ specs/005-cplex-lp-input/
 ├── contracts/           # Phase 1 output (/speckit.plan command)
 │   ├── lp_parser_api.md # LP parser module interface contract
 │   └── cli_api.md       # Updated CLI contract (multi-file + --format)
-├── features/
-│   └── cplex_lp_usage.feature  # BDD feature file (pre-implementation)
 └── tasks.md             # Phase 2 output (/speckit.tasks command)
+
+specs/001-gherkin-bdd-specs/features/
+└── cplex_lp_usage.feature  # NEW: BDD feature file for CPLEX LP CLI scenarios
+                            #     (pytest-bdd bdd_features_base_dir points here)
 ```
 
 ### Source Code (repository root)

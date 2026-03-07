@@ -81,13 +81,13 @@
 
 ### Tests for User Story 3 ⚠️ Write and confirm FAIL before implementing T017–T020
 
-- [ ] T016 [US3] Write unit tests for all `DWSolverInputError` error paths (missing file, empty Subject To, no Bounds variables, duplicate variable across blocks, single LP with no subproblems, unknown --format) in `tests/unit/test_lp_parser.py` — confirm FAIL
+- [ ] T016 [US3] Write unit tests for all `DWSolverInputError` error paths (missing file, empty Subject To, no Bounds variables, duplicate variable across blocks, single LP with no subproblems, unknown --format, master coupling-constraint variable not declared in any subproblem Bounds) in `tests/unit/test_lp_parser.py` — confirm FAIL
 
 ### Implementation for User Story 3
 
 - [ ] T017 [US3] Implement `DWSolverInputError` raises in `parse_master()` in `src/dwsolver/lp_parser.py` — no `Subject To` section found, zero constraints parsed
 - [ ] T018 [P] [US3] Implement `DWSolverInputError` raises in `parse_subproblem()` in `src/dwsolver/lp_parser.py` — no `Bounds` section, zero variables declared
-- [ ] T019 [US3] Implement `DWSolverInputError` raises in `assemble_problem()` in `src/dwsolver/lp_parser.py` — empty `subs` list, duplicate variable name across blocks
+- [ ] T019 [US3] Implement `DWSolverInputError` raises in `assemble_problem()` in `src/dwsolver/lp_parser.py` — empty `subs` list, duplicate variable name across blocks, master coupling-constraint variable not declared in any subproblem Bounds section
 - [ ] T020 [US3] Implement CLI error handling in `src/dwsolver/cli.py` — file-not-found for any LP file, unknown `--format` value, single LP file with no subproblems and no `--format json`, extra files in JSON mode
 
 **Checkpoint**: All US3 error paths raise `DWSolverInputError` / non-zero CLI exit. All US3 tests GREEN.
