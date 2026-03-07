@@ -59,18 +59,25 @@ def test_cross_validate_single() -> None:
 def test_cli_smoke(tmp_path: Path) -> None:
     """CLI exits 0, writes valid dwsolver JSON, prints a finite float to stdout."""
     out_file = tmp_path / "out.json"
-    proc = subprocess.run(
-        [
-            sys.executable,
-            str(Path(__file__).parent.parent / "synthetic.py"),
-            "--seed",
-            "42",
-            "--output",
-            str(out_file),
-        ],
-        capture_output=True,
-        text=True,
-    )
+    try:
+        proc = subprocess.run(
+            [
+                sys.executable,
+                str(Path(__file__).parent.parent / "synthetic.py"),
+                "--seed",
+                "42",
+                "--output",
+                str(out_file),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+    except subprocess.TimeoutExpired as exc:
+        pytest.fail(
+            f"CLI smoke test timed out after {exc.timeout} seconds; "
+            f"stdout: {exc.stdout!r}; stderr: {exc.stderr!r}"
+        )
     assert proc.returncode == 0, f"CLI exited {proc.returncode}; stderr: {proc.stderr!r}"
 
     # stdout must contain a parseable finite float
