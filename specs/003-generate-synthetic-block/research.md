@@ -10,11 +10,12 @@
 
 **Decision**: Use `numpy.random.default_rng(seed)` throughout the generator.
 
-**Rationale**: `numpy.random.default_rng` uses Philox-4×64-based PCG, which is
-reproducible across platforms and NumPy versions within the same major version.
+**Rationale**: `numpy.random.default_rng` currently uses the PCG64 bit generator
+by default, which is reproducible across platforms for a fixed NumPy version.
 All coefficient arrays, constraint coefficients, and slack values derive from
-a single RNG instance threaded through the generator — guaranteeing that the
-same seed always produces bit-for-bit identical output (FR-002 determinism).
+a single RNG instance threaded through the generator — guaranteeing that, for a
+fixed NumPy version, the same seed always produces bit-for-bit identical output
+(FR-002 determinism).
 
 **numpy version pin**: `numpy>=1.24` (default_rng stable API introduced 1.17;
 1.24 is the oldest version still receiving security patches as of 2026-03).
