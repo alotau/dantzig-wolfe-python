@@ -45,7 +45,7 @@ The reference C solver stores this as five CPLEX LP files:
 
 | File | Contents |
 |---|---|
-| `master.cplex` | 13 Arrival_Rate coupling constraints + full master objective |
+| `master.cplex` | 2 Arrival_Rate coupling constraints (`SEA,13` and `SEA,14`) + full master objective |
 | `subprob_1.cplex` | Block 1 — aircraft AC8_7, AC7_6 |
 | `subprob_2.cplex` | Block 2 — aircraft AC6_5, AC5_4 |
 | `subprob_3.cplex` | Block 3 — aircraft AC4_3, AC3_2 |
@@ -63,9 +63,9 @@ JSON encoding of the four_sea LP problem conforming to the `dwsolver` schema ver
 **FR-002** The fixture MUST have exactly 4 blocks, one per aircraft pair, matching
 the decomposition in the reference C solver's `subprob_1..4.cplex` files.
 
-**FR-003** The master section MUST encode all 13 `Arrival_Rate(SEA,j)` coupling
-constraints with RHS = 7 and sense `<=`. The master MUST NOT include placeholder
-constraints.
+**FR-003** The master section MUST encode exactly 2 `Arrival_Rate(SEA,j)` coupling
+constraints — `Arrival_Rate(SEA,13)` and `Arrival_Rate(SEA,14)` — both with RHS = 7
+and sense `<=`. The master MUST NOT include placeholder constraints.
 
 **FR-004** Each block's `constraints` section MUST include all Temporality (`>=`)
 and Sector_Time (`<=`) constraints from the corresponding CPLEX subproblem file.

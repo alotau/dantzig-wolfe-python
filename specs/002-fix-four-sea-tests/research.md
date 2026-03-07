@@ -156,7 +156,7 @@ block's `objective` array is built by looking up each block variable in the mast
 objective dict (0.0 for variables absent from the master objective).
 
 **D_i matrix structure** (COO encoding for block i):
-- Rows: master constraint index 0..12 (for each Arrival_Rate(SEA,j))
+- Rows: master constraint index 0 or 1 (for `Arrival_Rate(SEA,13)` and `Arrival_Rate(SEA,14)` respectively)
 - Cols: index of the linking variable in the block's `variable_names` list
 - Values: coefficient as given in the master constraint row (−1 or +1)
 - Source: the `Subject To` section of `master.cplex` lists the linking variables

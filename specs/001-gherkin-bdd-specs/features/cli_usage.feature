@@ -34,24 +34,20 @@ Feature: Command Line Interface — Dantzig-Wolfe Solver
   # Infeasible and unbounded problems
   # ---------------------------------------------------------------------------
 
-  # Exit code is 0: infeasible is a valid solver outcome, not a tool failure
-  Scenario: Report infeasible status for an infeasible problem
-    Given an infeasible LP input file "infeasible_problem.json"
-    When I run "dwsolver solve infeasible_problem.json"
+  # Exit code is 0: non-optimal outcomes are valid solver results, not tool failures
+  Scenario Outline: Report non-optimal status for an unsolvable problem
+    Given a "<status>" LP input file "<input_file>"
+    When I run "dwsolver solve <input_file>"
     Then the exit code is 0
-    And a solution file "infeasible_problem.solution.json" is created
-    And the solution file contains status "infeasible"
+    And a solution file "<solution_file>" is created
+    And the solution file contains status "<status>"
     And the solution file contains a non-empty diagnostic message
     And the solution file does not contain variable assignments
 
-  # Exit code is 0: unbounded is a valid solver outcome, not a tool failure
-  Scenario: Report unbounded status for an unbounded problem
-    Given an unbounded LP input file "unbounded_problem.json"
-    When I run "dwsolver solve unbounded_problem.json"
-    Then the exit code is 0
-    And a solution file "unbounded_problem.solution.json" is created
-    And the solution file contains status "unbounded"
-    And the solution file contains a non-empty diagnostic message
+    Examples:
+      | input_file              | solution_file                    | status     |
+      | infeasible_problem.json | infeasible_problem.solution.json | infeasible |
+      | unbounded_problem.json  | unbounded_problem.solution.json  | unbounded  |
 
   # ---------------------------------------------------------------------------
   # Input validation and error handling

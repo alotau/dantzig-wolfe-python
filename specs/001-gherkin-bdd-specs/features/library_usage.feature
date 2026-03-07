@@ -12,11 +12,7 @@ Feature: Python Library Interface — Dantzig-Wolfe Solver
     When I call solver.solve(problem)
     Then the result status is "optimal"
     And the result contains an objective value
-
-  Scenario: Access variable values from an optimal result
-    Given a Problem object with a valid two-block block-angular structure
-    When I call solver.solve(problem)
-    Then result.variable_values is a non-empty mapping of variable names to numeric values
+    And result.variable_values is a non-empty mapping of variable names to numeric values
 
   Scenario: Solve is stateless across multiple calls
     Given a Problem object "problem_a" and a different Problem object "problem_b"
@@ -52,17 +48,16 @@ Feature: Python Library Interface — Dantzig-Wolfe Solver
   # Non-optimal outcomes
   # ---------------------------------------------------------------------------
 
-  Scenario: Return infeasible status for an infeasible problem
-    Given a Problem object describing an infeasible LP
+  Scenario Outline: Return non-optimal status for an unsolvable problem
+    Given a Problem object describing a "<status>" LP
     When I call solver.solve(problem)
-    Then the result status is "infeasible"
+    Then the result status is "<status>"
     And result.variable_values is empty
 
-  Scenario: Return unbounded status for an unbounded problem
-    Given a Problem object describing an unbounded LP
-    When I call solver.solve(problem)
-    Then the result status is "unbounded"
-    And result.variable_values is empty
+    Examples:
+      | status     |
+      | infeasible |
+      | unbounded  |
 
   # ---------------------------------------------------------------------------
   # Iteration limit — partial result
