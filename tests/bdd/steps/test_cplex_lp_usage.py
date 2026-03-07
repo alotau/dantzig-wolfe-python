@@ -238,9 +238,15 @@ def then_solution_objective_approx(
 @then("an error message is written to stderr")
 def then_error_on_stderr(shared_ctx: dict[str, Any]) -> None:
     result = shared_ctx["result"]
-    # CliRunner captures stderr in output when mix_stderr=True (default).
-    assert result.output or result.exception, (
-        "Expected error output but got none"
+    # Support both configurations:
+    # - mix_stderr=True: stderr is merged into result.output
+    # - mix_stderr=False: stderr is available as result.stderr
+    stderr_text = getattr(result, "stderr", "")
+    assert result.output or stderr_text or result.exception, (
+        "Expected error output on stderr but got none.\n"
+        f"stdout: {result.output!r}\n"
+        f"stderr: {stderr_text!r}\n"
+        f"exception: {result.exception!r}"
     )
     # Non-zero exit confirms an error was raised.
     assert result.exit_code != 0, (
