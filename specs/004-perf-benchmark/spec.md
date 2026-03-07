@@ -1,6 +1,6 @@
 # Feature Specification: Performance Benchmark — Workers vs. Subproblems
 
-**Feature Branch**: `001-perf-benchmark`
+**Feature Branch**: `004-perf-benchmark`
 **Created**: 2026-03-06
 **Status**: Draft
 
