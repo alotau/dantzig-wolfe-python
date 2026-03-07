@@ -1,6 +1,10 @@
-"""Command-line interface for dwsolver — T019.
+"""Command-line interface for dwsolver — T011/T020.
 
-Entry point: ``dwsolver [OPTIONS] PROBLEM_FILE``
+Entry point: ``dwsolver [OPTIONS] FILES...``
+
+Accepts either a single JSON problem file or a master + subproblem CPLEX LP
+file set.  Format is auto-detected from the first file's extension unless
+``--format`` overrides it.
 
 Exit codes:
     0  — solver ran successfully (optimal, infeasible, unbounded, or iteration limit)
@@ -18,10 +22,54 @@ import click
 from dwsolver.models import DEFAULT_TOLERANCE, DWSolverInputError, Problem
 from dwsolver.solver import solve
 
+_LP_EXTENSIONS = frozenset({".lp", ".cplex"})
+
+
+def _detect_format(files: tuple[str, ...], fmt: str | None) -> str:
+    """Return ``"json"`` or ``"lp"`` based on ``--format`` or file extension.
+
+    Raises ``DWSolverInputError`` for unknown extensions or invalid argument
+    combinations (e.g. single LP file without ``--format json``).
+    """
+    if fmt == "json":
+        return "json"
+    if fmt == "lp":
+        return "lp"
+
+    # Auto-detect from first file's extension.
+    first_ext = Path(files[0]).suffix.lower()
+    if first_ext == ".json":
+        return "json"
+    if first_ext in _LP_EXTENSIONS:
+        if len(files) == 1:
+            raise DWSolverInputError(
+                f"Single CPLEX LP file provided ({files[0]!r}). "
+                "LP format requires a master file and at least one subproblem file. "
+                "To load a JSON problem, use --format json."
+            )
+        return "lp"
+
+    raise DWSolverInputError(
+        f"Cannot determine input format from extension {first_ext!r}. "
+        "Use --format json or --format lp."
+    )
+
 
 @click.command()
-@click.argument("problem_file", type=click.Path(exists=False))
-@click.option("--output", "-o", default=None, help="Output path (default: <input>.solution.json)")
+@click.argument("files", nargs=-1, required=True)
+@click.option(
+    "--format",
+    "fmt",
+    default=None,
+    type=click.Choice(["json", "lp"]),
+    help="Override input format detection (json or lp).",
+)
+@click.option(
+    "--output",
+    "-o",
+    default=None,
+    help="Output path (default: <first file stem>.solution.json)",
+)
 @click.option("--workers", "-w", default=None, type=int, help="Parallel subproblem workers")
 @click.option(
     "--tolerance",
@@ -32,31 +80,39 @@ from dwsolver.solver import solve
     help="DW convergence tolerance",
 )
 def main(
-    problem_file: str,
+    files: tuple[str, ...],
+    fmt: str | None,
     output: str | None,
     workers: int | None,
     tolerance: float,
 ) -> None:
     """Solve a block-angular LP using Dantzig-Wolfe decomposition.
 
-    PROBLEM_FILE is the path to a dwsolver JSON input file.
-    The solution is written to PROBLEM_FILE.solution.json by default.
+    FILES is one JSON problem file, or a master CPLEX LP file followed by one
+    or more subproblem CPLEX LP files.  Format is auto-detected from the first
+    file's extension (.json → JSON, .lp/.cplex → CPLEX LP).
+
+    The solution is written to <first-file-stem>.solution.json by default.
     """
     try:
-        problem = Problem.from_file(problem_file)
+        detected = _detect_format(files, fmt)
+        if detected == "json":
+            if len(files) != 1:
+                raise DWSolverInputError(
+                    "JSON input requires exactly one problem file. "
+                    f"Received {len(files)} files: {', '.join(repr(f) for f in files)}."
+                )
+            problem = Problem.from_file(files[0])
+        else:
+            problem = Problem.from_lp(files[0], list(files[1:]))
     except DWSolverInputError as exc:
         click.echo(str(exc), err=True)
         sys.exit(1)
 
     result = solve(problem, workers=workers, tolerance=tolerance)
 
-    # Default output: strip the input extension, append .solution.json
-    # e.g. "problem.json" → "problem.solution.json"
-    if output is None:
-        stem = Path(problem_file).stem
-        out_path = str(Path(problem_file).parent / f"{stem}.solution.json")
-    else:
-        out_path = output
+    first = Path(files[0])
+    out_path = str(first.parent / f"{first.stem}.solution.json") if output is None else output
     try:
         Path(out_path).write_text(json.dumps(result.model_dump(), indent=2), encoding="utf-8")
     except OSError as exc:

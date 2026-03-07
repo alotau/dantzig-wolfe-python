@@ -59,3 +59,6 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 bdd_features_base_dir = "specs/001-gherkin-bdd-specs/features"
+markers = [
+    "slow: marks tests as slow (LP solves); deselect with -m 'not slow'",
+]

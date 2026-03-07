@@ -268,6 +268,56 @@ class Problem(BaseModel):
         except ValidationError as exc:
             raise DWSolverInputError(f"Schema validation failed for {path!r}: {exc}") from exc
 
+    @classmethod
+    def from_lp(
+        cls,
+        master_path: str | Path,
+        subproblem_paths: list[str | Path],
+    ) -> Problem:
+        """Load and assemble a Problem from CPLEX LP files.
+
+        Args:
+            master_path: Path to the master LP/CPLEX file.
+            subproblem_paths: Ordered list of subproblem LP/CPLEX file paths.
+
+        Returns:
+            Validated Problem instance.
+
+        Raises:
+            DWSolverInputError: For I/O, parse, or assembly errors.
+        """
+        from dwsolver.lp_parser import load_problem_from_lp
+
+        return load_problem_from_lp(
+            Path(master_path),
+            [Path(p) for p in subproblem_paths],
+        )
+
+    @classmethod
+    def from_lp_text(
+        cls,
+        master_text: str,
+        subproblem_texts: list[str],
+    ) -> Problem:
+        """Parse and assemble a Problem from CPLEX LP text strings.
+
+        Args:
+            master_text: Full text of the master LP/CPLEX file.
+            subproblem_texts: Ordered list of subproblem LP/CPLEX texts.
+                Position determines block_id (``"block_0"``, ``"block_1"``, …).
+
+        Returns:
+            Validated Problem instance.
+
+        Raises:
+            DWSolverInputError: For parse or assembly errors.
+        """
+        from dwsolver.lp_parser import assemble_problem, parse_master, parse_subproblem
+
+        master = parse_master(master_text)
+        subs = [parse_subproblem(text, f"block_{i}") for i, text in enumerate(subproblem_texts)]
+        return assemble_problem(master, subs)
+
 
 # ---------------------------------------------------------------------------
 # Output models
