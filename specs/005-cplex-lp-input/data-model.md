@@ -119,10 +119,10 @@ existing `Problem` Pydantic model:
 For each sub `s` and its variable list `V`:
 
 ```
-if any(s.objective.get(v, 0.0) != 0.0 for v in V):
-    block_obj = [s.objective.get(v, 0.0) for v in V]
-else:
+if any(master.objective.get(v, 0.0) != 0.0 for v in V):
     block_obj = [master.objective.get(v, 0.0) for v in V]
+else:
+    block_obj = [s.objective.get(v, 0.0) for v in V]
 ```
 
 ### Objective Constant Injection
