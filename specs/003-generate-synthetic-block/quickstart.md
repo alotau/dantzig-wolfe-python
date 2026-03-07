@@ -37,7 +37,10 @@ tests/unit/test_synthetic.py::TestSC002Synthetic::test_cross_validate[seed=1-2bl
 tests/unit/test_synthetic.py::TestSC002Synthetic::test_cross_validate[seed=2-2blk-8var-2mc] PASSED
 ...
 tests/unit/test_synthetic.py::TestSC002Synthetic::test_cross_validate[seed=12-6blk-15var-3mc] PASSED
-12 passed in Xs
+tests/unit/test_synthetic.py::test_cross_validate_single PASSED
+tests/unit/test_synthetic.py::test_cli_smoke PASSED
+tests/unit/test_synthetic.py::test_determinism PASSED
+15 passed in Xs
 ```
 
 ---
