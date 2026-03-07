@@ -64,14 +64,15 @@ confirms the two objectives agree within `CROSS_VALIDATION_ABS_TOL`.
 **Goal**: 12 structurally diverse seeds are exercised in a single parametrized class.
 CI output shows human-readable IDs. All 12 pass in under 60 seconds.
 
-**Independent Test**: `pytest tests/unit/test_synthetic.py -v` → exactly 12 items collected,
-all PASS, IDs match `seed=N-Mblk-Vvar-Cmc` pattern.
+**Independent Test**: `pytest tests/unit/test_synthetic.py -v` → exactly 15 items collected
+(3 standalone tests + 12 parametrized `TestSC002Synthetic::test_cross_validate` cases),
+all PASS, parametrized IDs match `seed=N-Mblk-Vvar-Cmc` pattern.
 
 ### Implementation for User Story 2
 
 - [X] T008 [P] [US2] Add `SYNTHETIC_CASES: list[SyntheticCase]` module-level constant to `tests/synthetic.py` with all 12 entries from the seed table in `specs/003-generate-synthetic-block/research.md` (seeds 1–12, blocks 2–6, vars/blk 5–20, labels verbatim from the table)
 - [X] T009 [US2] Replace the single-seed test in `tests/unit/test_synthetic.py` with `TestSC002Synthetic` — `@pytest.mark.parametrize("case", SYNTHETIC_CASES, ids=[c.label for c in SYNTHETIC_CASES])` wrapping a single `test_cross_validate` method that generates and solves each case
-- [X] T010 [US2] Run `pytest tests/unit/test_synthetic.py -v` and confirm: (a) exactly 12 items are collected — this is enforced automatically by `@pytest.mark.parametrize` over `SYNTHETIC_CASES`; (b) all 12 pass; (c) spot-check the printed test IDs in CI output to confirm they match the `seed=N-Mblk-Vvar-Cmc` pattern from `SyntheticCase.label` (SC-001, SC-002, SC-003) — no manual counting required
+- [X] T010 [US2] Run `pytest tests/unit/test_synthetic.py -v` and confirm: (a) exactly 15 items are collected (3 standalone + 12 parametrized) — the 12 parametrized cases are enforced automatically by `@pytest.mark.parametrize` over `SYNTHETIC_CASES`; (b) all 15 pass; (c) spot-check the printed test IDs in CI output to confirm they match the `seed=N-Mblk-Vvar-Cmc` pattern from `SyntheticCase.label` (SC-001, SC-002, SC-003) — no manual counting required
 
 **Checkpoint**: 12/12 pass. IDs visible in output. `SC-004` (globally unique variable names) is
 implicitly verified by `Problem.model_validate()` inside `generate_problem`.
