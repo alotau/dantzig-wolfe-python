@@ -106,18 +106,18 @@ means the subproblem has no variables appearing in the master constraints.
 
 ### `resolve_block_objective(master: MasterLP, sub: SubproblemLP) -> list[float]`
 
-Determine the objective coefficient list for a block using the subproblem-first,
-master-fallback strategy.
+Determine the objective coefficient list for a block using a master-first,
+subproblem-fallback strategy.
 
 **Inputs**:
-- `master`: Parsed master (provides fallback coefficients).
-- `sub`: Parsed subproblem.
+- `master`: Parsed master (provides primary coefficients).
+- `sub`: Parsed subproblem (provides fallback coefficients).
 
 **Output**: `list[float]` of length `len(sub.variable_names)`.
 
 **Logic**:
-1. If any variable in `sub.variable_names` has a non-zero entry in `sub.objective`, use `sub.objective` (missing vars default to 0.0).
-2. Otherwise, use `master.objective` (missing vars default to 0.0).
+1. If any variable in `sub.variable_names` has a non-zero entry in `master.objective`, use `master.objective` (missing vars default to 0.0).
+2. Otherwise, use `sub.objective` (missing vars default to 0.0).
 
 ---
 
