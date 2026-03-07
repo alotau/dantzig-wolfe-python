@@ -597,3 +597,83 @@ class TestProblemFromLP:
             f"Objective mismatch: LP={lp_result.objective}, "
             f"JSON={json_result.objective}"
         )
+
+
+# ===========================================================================
+# Cross-format regression: small reference problems
+# ===========================================================================
+
+
+class TestCrossFormatRegression:
+    """LP fixtures built from small reference problems must solve to the same
+    optimal objective as the corresponding JSON fixtures.
+
+    Variable values are NOT compared — multiple optimal bases may exist.
+    Only the objective value must agree (SC-002).
+
+    Problems covered:
+      bertsimas  — 1 block, no local constraints, bounded variables, obj=-21.5
+      trick      — 2 blocks, local constraints, unbounded variables, obj=-40.0
+      lasdon     — 2 blocks, local constraints, unbounded variables, obj≈-36.667
+    """
+
+    def _run(
+        self,
+        lp_master: Path,
+        lp_subs: list[Path],
+        json_fixture: Path,
+        expected: float,
+        tol: float = 1e-4,
+    ) -> None:
+        from dwsolver.solver import solve
+
+        lp_problem = Problem.from_lp(lp_master, lp_subs)
+        json_problem = Problem.from_file(json_fixture)
+
+        lp_result = solve(lp_problem)
+        json_result = solve(json_problem)
+
+        assert lp_result.status == json_result.status, (
+            f"Status mismatch: LP={lp_result.status}, JSON={json_result.status}"
+        )
+        assert abs(lp_result.objective - expected) < tol, (
+            f"LP objective {lp_result.objective!r} not within {tol} of expected {expected}"
+        )
+        assert abs(json_result.objective - expected) < tol, (
+            f"JSON objective {json_result.objective!r} not within {tol} of expected {expected}"
+        )
+        assert abs(lp_result.objective - json_result.objective) < 1e-6, (
+            f"LP and JSON objectives differ: LP={lp_result.objective}, "
+            f"JSON={json_result.objective}"
+        )
+
+    def test_bertsimas_lp_matches_json(self) -> None:
+        """1-block, no local constraints, bounded vars. Known optimal: -21.5."""
+        d = _FIXTURES_DIR / "bertsimas_lp"
+        self._run(
+            d / "master.lp",
+            [d / "subprob_0.lp"],
+            _FIXTURES_DIR / "ref_book_bertsimas.json",
+            expected=-21.5,
+        )
+
+    def test_trick_lp_matches_json(self) -> None:
+        """2-block, local constraints, unbounded vars. Known optimal: -40.0."""
+        d = _FIXTURES_DIR / "trick_lp"
+        self._run(
+            d / "master.lp",
+            [d / "subprob_0.lp", d / "subprob_1.lp"],
+            _FIXTURES_DIR / "ref_web_trick.json",
+            expected=-40.0,
+        )
+
+    def test_lasdon_lp_matches_json(self) -> None:
+        """2-block, local constraints, unbounded vars. Known optimal: -110/3 ≈ -36.667."""
+        d = _FIXTURES_DIR / "lasdon_lp"
+        self._run(
+            d / "master.lp",
+            [d / "subprob_0.lp", d / "subprob_1.lp"],
+            _FIXTURES_DIR / "ref_book_lasdon.json",
+            expected=-110 / 3,
+            tol=1e-3,
+        )
