@@ -7,7 +7,7 @@ from pathlib import Path
 
 from benchmarks.models import BenchMatrix, CellError, CellResult
 
-_COL_W = 9   # width of each worker-count column
+_COL_W = 9  # width of each worker-count column
 _LABEL_W = 3  # width of the subproblem-count label column
 
 

@@ -10,14 +10,17 @@ from dwsolver import Problem, SolveStatus, solve
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _get_problem(n: int) -> Problem:
     from benchmarks.generator import make_bench_problem
+
     return make_bench_problem(n)
 
 
 # ---------------------------------------------------------------------------
 # Basic contract
 # ---------------------------------------------------------------------------
+
 
 def test_make_bench_problem_returns_valid_problem():
     """make_bench_problem(3) returns a Problem without raising."""
@@ -44,6 +47,7 @@ def test_make_bench_problem_identical_blocks():
 # Feasibility (marked slow: these require actual LP solves)
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.slow
 def test_make_bench_problem_feasibility_n1():
     result = solve(_get_problem(1))
@@ -66,6 +70,7 @@ def test_make_bench_problem_feasibility_n20():
 # Reference scaling: obj(n) == n * obj(1)  (up to solver tolerance)
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.slow
 def test_make_bench_problem_reference_scaling():
     """Objective of n=2 should be 2 × objective of n=1 (symmetric LP)."""
@@ -79,9 +84,11 @@ def test_make_bench_problem_reference_scaling():
 # Determinism
 # ---------------------------------------------------------------------------
 
+
 def test_make_bench_problem_deterministic():
     """Two calls with the same n return equivalent Problem instances."""
     from benchmarks.generator import make_bench_problem
+
     p1 = make_bench_problem(4)
     p2 = make_bench_problem(4)
     # Compare via their serialised dict representations
@@ -92,13 +99,16 @@ def test_make_bench_problem_deterministic():
 # Boundary validation
 # ---------------------------------------------------------------------------
 
+
 def test_make_bench_problem_invalid_n_zero():
     from benchmarks.generator import make_bench_problem
+
     with pytest.raises(ValueError):
         make_bench_problem(0)
 
 
 def test_make_bench_problem_invalid_n_21():
     from benchmarks.generator import make_bench_problem
+
     with pytest.raises(ValueError):
         make_bench_problem(21)

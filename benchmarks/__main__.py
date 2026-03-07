@@ -17,15 +17,25 @@ def main() -> None:
         description="Dantzig-Wolfe performance benchmark: workers vs. subproblems",
     )
     parser.add_argument(
-        "--repeats", type=int, default=1, metavar="N",
+        "--repeats",
+        type=int,
+        default=1,
+        metavar="N",
         help="Timed runs per cell; minimum is reported (default: 1)",
     )
     parser.add_argument(
-        "--timeout", type=float, default=120.0, metavar="SECONDS",
+        "--timeout",
+        type=float,
+        default=120.0,
+        metavar="SECONDS",
         help="Per-cell wall-clock timeout in seconds (default: 120)",
     )
     parser.add_argument(
-        "--save-chart", type=Path, default=None, metavar="PATH", dest="save_chart",
+        "--save-chart",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        dest="save_chart",
         help="Write heatmap+line-chart PNG to this path",
     )
     args = parser.parse_args()
@@ -55,4 +65,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

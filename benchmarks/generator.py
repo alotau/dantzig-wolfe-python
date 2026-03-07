@@ -12,10 +12,10 @@ from dwsolver import Problem
 from dwsolver.models import Block, BlockConstraints, Bounds, LinkingColumns, Master
 
 _SEED = 0
-_N_VARS = 10       # variables per block
-_N_LOCAL = 5       # local constraints per block
-_X_STAR = 0.5      # interior feasibility reference point
-_MAX_N = 20        # maximum allowed n_blocks
+_N_VARS = 10  # variables per block
+_N_LOCAL = 5  # local constraints per block
+_X_STAR = 0.5  # interior feasibility reference point
+_MAX_N = 20  # maximum allowed n_blocks
 
 
 def make_bench_problem(n_blocks: int) -> Problem:
