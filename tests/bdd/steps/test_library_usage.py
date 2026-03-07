@@ -129,14 +129,14 @@ def given_two_problems(shared_ctx: dict[str, Any]) -> None:
     )
 
 
-@given("a Problem object describing an infeasible LP")
-def given_infeasible_problem(shared_ctx: dict[str, Any]) -> None:
-    shared_ctx["problem"] = _infeasible_problem()
-
-
-@given("a Problem object describing an unbounded LP")
-def given_unbounded_problem(shared_ctx: dict[str, Any]) -> None:
-    shared_ctx["problem"] = _unbounded_problem()
+@given(parsers.parse('a Problem object describing a "{status}" LP'))
+def given_non_optimal_problem(status: str, shared_ctx: dict[str, Any]) -> None:
+    if status == "infeasible":
+        shared_ctx["problem"] = _infeasible_problem()
+    elif status == "unbounded":
+        shared_ctx["problem"] = _unbounded_problem()
+    else:
+        raise ValueError(f"Unknown problem status: {status!r}")
 
 
 @given("a Problem object and a Solver configured with a very low iteration limit")
