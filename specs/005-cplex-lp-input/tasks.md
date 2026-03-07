@@ -37,7 +37,7 @@
 
 ### Tests for User Story 1 ⚠️ Write and confirm FAIL before implementing T006–T011
 
-- [ ] T004 [P] [US1] Write unit tests for `parse_master()`, `infer_linking()`, `resolve_block_objective()` in `tests/unit/test_lp_parser.py` covering four_sea master (constraint count, objective coefficients, constant term) — confirm FAIL
+- [ ] T004 [P] [US1] Write unit tests for `parse_master()`, `parse_subproblem()`, `infer_linking()`, `resolve_block_objective()` in `tests/unit/test_lp_parser.py` covering four_sea master (constraint count, objective coefficients, constant term) and a `parse_subproblem()` case with a `Generals` section present verifying it is silently ignored (FR-009) — confirm FAIL
 - [ ] T005 [P] [US1] Write BDD step implementations in `tests/bdd/steps/test_cplex_lp_usage.py` wiring `specs/001-gherkin-bdd-specs/features/cplex_lp_usage.feature` scenarios — confirm FAIL
 
 ### Implementation for User Story 1
@@ -61,13 +61,13 @@
 
 ### Tests for User Story 2 ⚠️ Write and confirm FAIL before implementing T013–T015
 
-- [ ] T012 [US2] Write unit tests for `Problem.from_lp()` and `Problem.from_lp_text()` (happy path, four_sea regression, from-text equivalence) in `tests/unit/test_lp_parser.py` — confirm FAIL
+- [ ] T012 [US2] Write unit tests for `Problem.from_lp()` and `Problem.from_lp_text()` (happy path, four_sea regression, from-text equivalence; cross-format assertion: load four_sea via `Problem.from_file()` with JSON fixture and via `Problem.from_lp()` with CPLEX fixtures and assert `abs(lp_objective - json_objective) < 1e-6`, satisfying SC-002) in `tests/unit/test_lp_parser.py` — confirm FAIL
 
 ### Implementation for User Story 2
 
 - [ ] T013 [US2] Add `Problem.from_lp(master_path, subproblem_paths)` class method in `src/dwsolver/models.py` — delegates to `load_problem_from_lp()` from `lp_parser`
 - [ ] T014 [US2] Add `Problem.from_lp_text(master_text, subproblem_texts)` class method in `src/dwsolver/models.py` — parses from strings, no file I/O
-- [ ] T015 [P] [US2] Update `src/dwsolver/__init__.py` docstring to document `Problem.from_lp` and `Problem.from_lp_text` in the public API comment header
+- [ ] T015 [US2] Update `src/dwsolver/__init__.py` docstring to document `Problem.from_lp` and `Problem.from_lp_text` in the public API comment header (depends on T013, T014)
 
 **Checkpoint**: `Problem.from_lp()` and `Problem.from_lp_text()` callable from Python, four_sea yields `objective == 12.0`. All US2 tests GREEN.
 
@@ -77,7 +77,9 @@
 
 **Goal**: Every invalid input path raises `DWSolverInputError` with a message naming the file and describing the problem. No silent wrong answers.
 
-**Independent Test**: Invoke CLI with a truncated `.lp` file (empty Subject To); assert non-zero exit code, no output file written, descriptive message on stderr.
+**Independent Test**: Invoke CLI with a `.lp` file whose `Subject To` section is empty; assert non-zero exit code, no output file written, descriptive message on stderr.
+
+**Note**: US3 error paths are covered by unit tests only. BDD scenarios are intentionally omitted for this story — error conditions are edge cases of the CLI workflow, not part of the primary user journey described by the Gherkin feature file.
 
 ### Tests for User Story 3 ⚠️ Write and confirm FAIL before implementing T017–T020
 

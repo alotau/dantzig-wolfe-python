@@ -64,8 +64,9 @@ pass the result to `solve()`; assert `result.objective == 12.0`.
    developer calls `Problem.from_lp(master_path, subproblem_paths)`, **Then** a
    fully validated `Problem` object is returned.
 2. **Given** the returned `Problem` object, **When** `solve(problem)` is called,
-   **Then** the returned `Result` is identical in structure to what JSON-loaded
-   problems produce.
+   **Then** the returned `Result` has the same fields, types, and non-zero
+   `objective` as a `Result` produced by solving the same problem loaded via
+   `Problem.from_file()` with an equivalent JSON fixture.
 3. **Given** CPLEX LP content already in memory as strings, **When** a developer
    calls `Problem.from_lp_text(master_text, [sub1_text, sub2_text])`, **Then** a
    validated `Problem` is returned without any file I/O.
@@ -84,9 +85,9 @@ an opaque crash.
 **Why this priority**: Good error handling is essential usability; without it, users
 cannot debug their CPLEX LP files.
 
-**Independent Test**: Invoke the CLI with a truncated `.lp` file (missing `End`
-keyword) and verify diagnostic output on stderr, non-zero exit code, and no output
-file created.
+**Independent Test**: Invoke the CLI with a `.lp` file whose `Subject To` section
+is empty (zero coupling constraints); verify a descriptive error message on stderr,
+a non-zero exit code, and no output file created.
 
 **Acceptance Scenarios**:
 
@@ -119,7 +120,7 @@ file created.
   section. If neither contains coefficients for a variable, its objective coefficient
   is zero.
 - **`Generals`/`Binary` sections**: Silently ignored; the solver operates on the LP
-  relaxation (integer constraints are not supported).
+  relaxation (integer constraints are not supported). (See also FR-009.)
 - **Maximisation direction**: A `Maximize` section in either master or subproblem is
   honoured by negating the objective (consistent with the solver's minimisation
   convention).
@@ -163,7 +164,8 @@ file created.
 - **FR-008**: The parser MUST support CPLEX LP sense operators `<=`, `>=`, and `=` in
   both `Subject To` and `Bounds` sections.
 - **FR-009**: The parser MUST silently ignore `Generals`, `General`, `Gen`, `Binary`,
-  and `Bin` sections (LP relaxation).
+  and `Bin` sections (LP relaxation). (See also `Generals`/`Binary` sections edge
+  case.)
 - **FR-010**: The parser MUST support backslash-prefixed comment lines and multi-line
   expressions (continuation lines with leading whitespace).
 - **FR-011**: Existing `dwsolver problem.json` invocations MUST continue to work
