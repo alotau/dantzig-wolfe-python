@@ -12,12 +12,13 @@ integration-level unit tests (parse real files, validate structure and counts).
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from dwsolver.lp_parser import (
     MasterLP,
     SubproblemLP,
-    LinkingSpec,
     assemble_problem,
     infer_linking,
     load_problem_from_lp,
@@ -26,8 +27,6 @@ from dwsolver.lp_parser import (
     resolve_block_objective,
 )
 from dwsolver.models import DWSolverInputError, Problem
-
-from pathlib import Path
 
 # ---------------------------------------------------------------------------
 # Fixture files
@@ -331,7 +330,7 @@ class TestInferLinking:
         """c1: x1 + y1 <= 10 — sub1 owns x1 (col index 0) at row 0."""
         master, sub = self._master_and_sub()
         linking = infer_linking(master, sub)
-        pairs = list(zip(linking.rows, linking.cols, linking.values))
+        pairs = list(zip(linking.rows, linking.cols, linking.values, strict=True))
         # x1 belongs to sub1 (block_0); should appear at (row=0, col=0, val=1.0)
         assert (0, 0, 1.0) in pairs
 
@@ -373,8 +372,7 @@ class TestResolveBlockObjective:
         master = parse_master(master_lp)
         # Sub has x1 + 2 x2 as REAL objective; master doesn't mention x1/x2
         sub_lp = (
-            "Minimize\n obj: x1 + 2 x2\nSubject To\nBounds\n"
-            " 0 <= x1 <= 1\n 0 <= x2 <= 1\nEnd\n"
+            "Minimize\n obj: x1 + 2 x2\nSubject To\nBounds\n 0 <= x1 <= 1\n 0 <= x2 <= 1\nEnd\n"
         )
         sub = parse_subproblem(sub_lp, "block_0")
         obj = resolve_block_objective(master, sub)
@@ -404,7 +402,6 @@ class TestResolveBlockObjective:
 
 
 class TestErrorPaths:
-
     # --- parse_master errors ---
 
     def test_master_no_subject_to(self) -> None:
@@ -435,10 +432,7 @@ class TestErrorPaths:
     def test_assemble_duplicate_variable_across_blocks(self) -> None:
         """Variable appearing in two subproblems raises DWSolverInputError."""
         # Both subs declare x1.
-        dup_sub_lp = (
-            "Minimize\nSubject To\n c1: x1 >= 0\n"
-            "Bounds\n 0 <= x1 <= 5\nEnd\n"
-        )
+        dup_sub_lp = "Minimize\nSubject To\n c1: x1 >= 0\nBounds\n 0 <= x1 <= 5\nEnd\n"
         # Build a master that references x1 in coupling constraints.
         master_lp = "Minimize\n obj: x1\nSubject To\n c1: x1 <= 10\nEnd\n"
         master = parse_master(master_lp)
@@ -450,14 +444,8 @@ class TestErrorPaths:
     def test_assemble_master_var_not_in_any_subproblem(self) -> None:
         """Coupling constraint variable absent from all Bounds raises error."""
         # Master references "phantom_var" in a constraint; no sub declares it.
-        master_lp = (
-            "Minimize\n obj: phantom_var\n"
-            "Subject To\n c1: phantom_var <= 10\nEnd\n"
-        )
-        sub_lp = (
-            "Minimize\nSubject To\n c1: x1 >= 0\n"
-            "Bounds\n 0 <= x1 <= 5\nEnd\n"
-        )
+        master_lp = "Minimize\n obj: phantom_var\nSubject To\n c1: phantom_var <= 10\nEnd\n"
+        sub_lp = "Minimize\nSubject To\n c1: x1 >= 0\nBounds\n 0 <= x1 <= 5\nEnd\n"
         master = parse_master(master_lp)
         sub = parse_subproblem(sub_lp, "block_0")
         with pytest.raises(DWSolverInputError, match="phantom_var"):
@@ -526,23 +514,17 @@ class TestProblemFromLP:
     """Tests for the Problem public factory methods that load CPLEX LP files."""
 
     def test_from_lp_text_simple_creates_problem(self) -> None:
-        problem = Problem.from_lp_text(
-            _SIMPLE_MASTER_LP, [_SIMPLE_SUB1_LP, _SIMPLE_SUB2_LP]
-        )
+        problem = Problem.from_lp_text(_SIMPLE_MASTER_LP, [_SIMPLE_SUB1_LP, _SIMPLE_SUB2_LP])
         assert isinstance(problem, Problem)
         assert len(problem.blocks) == 2
 
     def test_from_lp_text_block_ids_are_zero_indexed(self) -> None:
-        problem = Problem.from_lp_text(
-            _SIMPLE_MASTER_LP, [_SIMPLE_SUB1_LP, _SIMPLE_SUB2_LP]
-        )
+        problem = Problem.from_lp_text(_SIMPLE_MASTER_LP, [_SIMPLE_SUB1_LP, _SIMPLE_SUB2_LP])
         assert problem.blocks[0].block_id == "block_0"
         assert problem.blocks[1].block_id == "block_1"
 
     def test_from_lp_text_master_rhs_transferred(self) -> None:
-        problem = Problem.from_lp_text(
-            _SIMPLE_MASTER_LP, [_SIMPLE_SUB1_LP, _SIMPLE_SUB2_LP]
-        )
+        problem = Problem.from_lp_text(_SIMPLE_MASTER_LP, [_SIMPLE_SUB1_LP, _SIMPLE_SUB2_LP])
         assert problem.master.rhs == [10.0, 5.0]
 
     def test_from_lp_text_propagates_parse_error(self) -> None:
@@ -594,8 +576,7 @@ class TestProblemFromLP:
         json_result = solve(json_problem)
 
         assert abs(lp_result.objective - json_result.objective) < 1e-6, (
-            f"Objective mismatch: LP={lp_result.objective}, "
-            f"JSON={json_result.objective}"
+            f"Objective mismatch: LP={lp_result.objective}, JSON={json_result.objective}"
         )
 
 
@@ -643,8 +624,7 @@ class TestCrossFormatRegression:
             f"JSON objective {json_result.objective!r} not within {tol} of expected {expected}"
         )
         assert abs(lp_result.objective - json_result.objective) < 1e-6, (
-            f"LP and JSON objectives differ: LP={lp_result.objective}, "
-            f"JSON={json_result.objective}"
+            f"LP and JSON objectives differ: LP={lp_result.objective}, JSON={json_result.objective}"
         )
 
     def test_bertsimas_lp_matches_json(self) -> None:

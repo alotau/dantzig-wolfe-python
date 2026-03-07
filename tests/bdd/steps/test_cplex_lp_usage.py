@@ -76,20 +76,12 @@ def _invoke(
 
         if part in ("--output", "-o") and i + 1 < len(parts):
             raw_out = parts[i + 1]
-            out_p = (
-                Path(raw_out)
-                if Path(raw_out).is_absolute()
-                else tmp_path / raw_out
-            )
+            out_p = Path(raw_out) if Path(raw_out).is_absolute() else tmp_path / raw_out
             args += [part, str(out_p)]
             output_path = out_p
             i += 2
 
-        elif part in ("--workers", "-w", "--tolerance", "-t") and i + 1 < len(parts):
-            args += [part, parts[i + 1]]
-            i += 2
-
-        elif part in ("--format",) and i + 1 < len(parts):
+        elif part in ("--workers", "-w", "--tolerance", "-t", "--format") and i + 1 < len(parts):
             args += [part, parts[i + 1]]
             i += 2
 
@@ -156,8 +148,7 @@ def given_command_available() -> None:
 def given_four_sea_fixtures(shared_ctx: dict[str, Any]) -> None:
     """Confirm that the four_sea fixture directory exists."""
     assert _FOUR_SEA_DIR.exists(), (
-        f"four_sea fixtures not found at {_FOUR_SEA_DIR}; "
-        "run: T001 download step"
+        f"four_sea fixtures not found at {_FOUR_SEA_DIR}; run: T001 download step"
     )
     shared_ctx["four_sea_available"] = True
 
@@ -200,15 +191,11 @@ def then_exit_code(code: int, shared_ctx: dict[str, Any]) -> None:
 @then("the exit code is non-zero")
 def then_exit_nonzero(shared_ctx: dict[str, Any]) -> None:
     result = shared_ctx["result"]
-    assert result.exit_code != 0, (
-        f"Expected non-zero exit code, got 0.\nOutput: {result.output!r}"
-    )
+    assert result.exit_code != 0, f"Expected non-zero exit code, got 0.\nOutput: {result.output!r}"
 
 
 @then(parsers.parse('a solution file "{filename}" is created'))
-def then_solution_file_created(
-    filename: str, shared_ctx: dict[str, Any], tmp_path: Path
-) -> None:
+def then_solution_file_created(filename: str, shared_ctx: dict[str, Any], tmp_path: Path) -> None:
     # Check output_path first; fall back to tmp_path / filename.
     out_p: Path | None = shared_ctx.get("output_path")
     if out_p is None or out_p.name != filename:
@@ -224,15 +211,11 @@ def then_solution_status(status: str, shared_ctx: dict[str, Any]) -> None:
 
 
 @then(parsers.parse("the solution file objective is approximately {value:g}"))
-def then_solution_objective_approx(
-    value: float, shared_ctx: dict[str, Any]
-) -> None:
+def then_solution_objective_approx(value: float, shared_ctx: dict[str, Any]) -> None:
     data = _load_solution(shared_ctx)
     obj = data.get("objective")
     assert obj is not None, "Solution file has no 'objective' field"
-    assert abs(obj - value) < 1e-3, (
-        f"Expected objective ≈ {value}, got {obj}"
-    )
+    assert abs(obj - value) < 1e-3, f"Expected objective ≈ {value}, got {obj}"
 
 
 @then("an error message is written to stderr")
