@@ -13,7 +13,7 @@ class CellError(Enum):
     """Non-solve terminal states for a benchmark cell."""
 
     TIMEOUT = "TIMEOUT"
-    ERROR = "ERROR"
+    ERROR = "ERR"
 
 
 @dataclass
