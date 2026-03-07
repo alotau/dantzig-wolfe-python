@@ -278,7 +278,8 @@ def _parse_subproblem_constraints(
         for vm in _COEFF_VAR_RE.finditer(expr):
             vname = vm.group(2)
             if vname in var_index:
-                row[var_index[vname]] = _parse_coeff(vm.group(1))
+                coeff = _parse_coeff(vm.group(1))
+                row[var_index[vname]] += coeff
 
         names.append(cname)
         senses.append(sense)
