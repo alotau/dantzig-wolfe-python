@@ -158,13 +158,8 @@ def given_valid_file(filename: str, shared_ctx: dict[str, Any]) -> None:
     shared_ctx["input_filename"] = filename
 
 
-@given(parsers.parse('an infeasible LP input file "{filename}"'))
-def given_infeasible_file(filename: str, shared_ctx: dict[str, Any]) -> None:
-    shared_ctx["input_filename"] = filename
-
-
-@given(parsers.parse('an unbounded LP input file "{filename}"'))
-def given_unbounded_file(filename: str, shared_ctx: dict[str, Any]) -> None:
+@given(parsers.parse('a "{status}" LP input file "{filename}"'))
+def given_status_file(status: str, filename: str, shared_ctx: dict[str, Any]) -> None:
     shared_ctx["input_filename"] = filename
 
 
