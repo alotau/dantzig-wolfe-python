@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0",
+  "metadata": {
+    "name": "ref_book_bertsimas_triple",
+    "description": "Bertsimas & Tsitsiklis Introduction to Linear Optimization example 6.2 (p.245-246). 3-subproblem DW decomposition: block_0={x1}, block_1={x2}, block_2={x3}. Known optimal: x1=2.0, x2=1.5, x3=2.0, obj=-21.5."
+  },
+  "master": {
+    "constraint_names": ["Con1"],
+    "rhs": [17.0],
+    "senses": ["="]
+  },
+  "blocks": [
+    {
+      "block_id": "block_0",
+      "variable_names": ["x1"],
+      "objective": [-4.0],
+      "bounds": [
+        {"lower": 1.0, "upper": 2.0}
+      ],
+      "constraints": {
+        "matrix": [],
+        "rhs": [],
+        "senses": []
+      },
+      "linking_columns": {
+        "rows": [0],
+        "cols": [0],
+        "values": [3.0]
+      }
+    },
+    {
+      "block_id": "block_1",
+      "variable_names": ["x2"],
+      "objective": [-1.0],
+      "bounds": [
+        {"lower": 1.0, "upper": 2.0}
+      ],
+      "constraints": {
+        "matrix": [],
+        "rhs": [],
+        "senses": []
+      },
+      "linking_columns": {
+        "rows": [0],
+        "cols": [0],
+        "values": [2.0]
+      }
+    },
+    {
+      "block_id": "block_2",
+      "variable_names": ["x3"],
+      "objective": [-6.0],
+      "bounds": [
+        {"lower": 1.0, "upper": 2.0}
+      ],
+      "constraints": {
+        "matrix": [],
+        "rhs": [],
+        "senses": []
+      },
+      "linking_columns": {
+        "rows": [0],
+        "cols": [0],
+        "values": [4.0]
+      }
+    }
+  ]
+}

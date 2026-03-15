@@ -359,6 +359,16 @@ _CASES: list[_RefCase] = [
         "ref_four_sea.json",
         expected_obj=12.0,
     ),
+    _RefCase(
+        "ref_book_bertsimas_double.json",
+        expected_obj=-21.5,
+        expected_vars={"x1": 2.0, "x2": 1.5, "x3": 2.0},
+    ),
+    _RefCase(
+        "ref_book_bertsimas_triple.json",
+        expected_obj=-21.5,
+        expected_vars={"x1": 2.0, "x2": 1.5, "x3": 2.0},
+    ),
 ]
 
 
