@@ -25,16 +25,29 @@ Requires Python 3.11+ and automatically installs [`highspy`](https://pypi.org/pr
 
 ## CLI Usage
 
-```bash
-dwsolver problem.json
-# → writes problem.solution.json
-```
+Supports both **JSON** and **CPLEX LP** formats with automatic detection:
 
 ```bash
-dwsolver problem.json --output results/solution.json  # explicit output path
-dwsolver problem.json --workers 8                     # parallel subproblem solves
-dwsolver problem.json --tolerance 1e-4                # custom convergence tolerance
+# JSON format
+dwsolver problem.json
+# → writes problem.solution.json
+
+# CPLEX LP format: master file + one or more subproblem files
+dwsolver master.lp sub1.lp sub2.lp
+# → writes master.solution.json
 ```
+
+**Options** (apply to both formats):
+
+```bash
+dwsolver master.lp sub1.lp --output results/solution.json  # explicit output path
+dwsolver master.lp sub1.lp --workers 8                     # parallel subproblem solves
+dwsolver master.lp sub1.lp --tolerance 1e-4                # custom convergence tolerance
+dwsolver master.lp sub1.lp --format lp                     # override auto-detection
+```
+
+**Format detection**: File extension determines format (`.json` → JSON; `.lp` or `.cplex` → CPLEX LP).
+Use `--format` to override. CPLEX LP requires a master file and at least one subproblem file.
 
 **Exit codes**: `0` for all valid solver outcomes (optimal, infeasible, unbounded, iteration
 limit); `1` for tool failures (missing file, invalid schema). Always check `status` in the
@@ -47,8 +60,16 @@ output JSON for the actual solver result.
 ```python
 from dwsolver import solve, Problem, SolveStatus, DWSolverInputError
 
-# Load from file
+# Load from JSON file
 problem = Problem.from_file("problem.json")
+result = solve(problem)
+
+# Load from CPLEX LP files
+problem = Problem.from_lp("master.lp", ["sub1.lp", "sub2.lp"])
+result = solve(problem)
+
+# Load from in-memory strings (CPLEX LP)
+problem = Problem.from_lp_text(master_text, [sub1_text, sub2_text])
 result = solve(problem)
 
 print(result.status)            # "optimal" | "infeasible" | "unbounded" | "iteration_limit"
@@ -82,9 +103,13 @@ except DWSolverInputError as exc:
 
 ---
 
-## Input Format
+## Input Formats
 
-Problems are described in JSON ([full schema reference](specs/001-gherkin-bdd-specs/contracts/json_schema.md)):
+Problems can be described in **JSON** or **CPLEX LP** format.
+
+### JSON Format
+
+Structured JSON ([full schema reference](specs/001-gherkin-bdd-specs/contracts/json_schema.md)):
 
 ```json
 {
@@ -106,6 +131,38 @@ Problems are described in JSON ([full schema reference](specs/001-gherkin-bdd-sp
   ]
 }
 ```
+
+### CPLEX LP Format
+
+Industrial-standard CPLEX LP format. Provide a master file defining coupling constraints
+and one or more subproblem files defining local constraints, bounds, and subproblem objectives.
+Format is auto-detected from file extension (`.lp`, `.cplex`):
+
+**Master file** (`master.lp`):
+```
+Minimize
+ obj: c1*x1 + c2*x2 + ...  
+Subject To
+ row1: expr1 <= rhs1
+ row2: expr2 = rhs2
+End
+```
+
+**Subproblem file** (`sub1.lp`):
+```
+Minimize
+ obj: d1*x1 + ...          
+Subject To
+ local_row1: expr1 >= rhs1
+Bounds
+ 0 <= x1 <= 10
+ x2 free
+End
+```
+
+Variables are matched by name across master and subproblem files; those appearing in master
+coupling constraints form the linking structure automatically. Block variables are inferred
+from subproblem bounds.
 
 ---
 
