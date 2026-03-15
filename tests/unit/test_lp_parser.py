@@ -593,9 +593,11 @@ class TestCrossFormatRegression:
     Only the objective value must agree (SC-002).
 
     Problems covered:
-      bertsimas  — 1 block, no local constraints, bounded variables, obj=-21.5
-      trick      — 2 blocks, local constraints, unbounded variables, obj=-40.0
-      lasdon     — 2 blocks, local constraints, unbounded variables, obj≈-36.667
+      bertsimas          — 1 block, no local constraints, bounded variables, obj=-21.5
+      trick              — 2 blocks, local constraints, unbounded variables, obj=-40.0
+      lasdon             — 2 blocks, local constraints, unbounded variables, obj≈-36.667
+      bertsimas_double   — 2 blocks, block_0={x1}, block_1={x2,x3}, obj=-21.5
+      bertsimas_triple   — 3 blocks, block_0={x1}, block_1={x2}, block_2={x3}, obj=-21.5
     """
 
     def _run(
