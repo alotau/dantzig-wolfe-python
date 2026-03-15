@@ -8,6 +8,7 @@ to the CLI entry point via Click's ``CliRunner``.
 from __future__ import annotations
 
 import json
+import math
 import shutil
 from pathlib import Path
 from typing import Any
@@ -16,6 +17,7 @@ import pytest
 from click.testing import CliRunner
 from pytest_bdd import given, parsers, scenarios, then, when
 
+from dwsolver import DWSolverInputError, Problem, solve
 from dwsolver.cli import main
 
 # Link all scenarios in the feature file to this module.
@@ -23,6 +25,97 @@ scenarios("cplex_lp_usage.feature")
 
 _FIXTURES_DIR = Path(__file__).parent.parent.parent / "fixtures"
 _FOUR_SEA_DIR = _FIXTURES_DIR / "four_sea"
+
+# ---------------------------------------------------------------------------
+# Minimal CPLEX LP strings reused by library API BDD steps
+# ---------------------------------------------------------------------------
+
+_BDD_MASTER_2BLOCK = """\
+Minimize
+ obj: x1 + 2 x2 + 3 y1 + 4 y2
+Subject To
+ c1: x1 + y1 <= 10
+ c2: x2 + y2 = 5
+End
+"""
+
+_BDD_SUB_BLOCK0 = """\
+Minimize
+ obj1: x1 + 2 x2
+Subject To
+ lc1: x1 - x2 >= 0
+Bounds
+ 0 <= x1 <= 5
+ 0 <= x2 <= 5
+End
+"""
+
+_BDD_SUB_BLOCK1 = """\
+Minimize
+ obj2: 3 y1 + 4 y2
+Subject To
+ lc2: y1 + y2 <= 4
+Bounds
+ 0 <= y1 <= 3
+ 0 <= y2 <= 3
+End
+"""
+
+_BDD_MASTER_EMPTY_SUBJECT_TO = """\
+Minimize
+ obj: x1
+Subject To
+End
+"""
+
+_BDD_SUB_VALID = """\
+Minimize
+Subject To
+Bounds
+ 0 <= x1 <= 5
+End
+"""
+
+_BDD_SUB_EMPTY_BOUNDS = """\
+Minimize
+Subject To
+Bounds
+End
+"""
+
+_BDD_MASTER_DUP = """\
+Minimize
+ obj: x1
+Subject To
+ c1: x1 <= 10
+End
+"""
+
+_BDD_SUB_DUP = """\
+Minimize
+Subject To
+ c1: x1 >= 0
+Bounds
+ 0 <= x1 <= 5
+End
+"""
+
+_BDD_MASTER_PHANTOM = """\
+Minimize
+ obj: phantom_var
+Subject To
+ c1: phantom_var <= 10
+End
+"""
+
+_BDD_SUB_KNOWN = """\
+Minimize
+Subject To
+ c1: x1 >= 0
+Bounds
+ 0 <= x1 <= 5
+End
+"""
 
 
 # ---------------------------------------------------------------------------
@@ -234,4 +327,185 @@ def then_error_on_stderr(shared_ctx: dict[str, Any]) -> None:
     # Non-zero exit confirms an error was raised.
     assert result.exit_code != 0, (
         f"Expected non-zero exit code for error scenario, got {result.exit_code}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# US2 — Library API: When steps
+# ---------------------------------------------------------------------------
+
+
+def _capture_lp(shared_ctx: dict[str, Any], fn: object) -> None:
+    """Run *fn*, storing result or exception under ``lp_problem``/``lp_exception``."""
+    exc: Exception | None = None
+    problem: Problem | None = None
+    try:
+        problem = fn()  # type: ignore[operator]
+    except DWSolverInputError as e:
+        exc = e
+    shared_ctx["lp_problem"] = problem
+    shared_ctx["lp_exception"] = exc
+
+
+@when("I call Problem.from_lp with the four_sea master and subproblem files")
+def when_from_lp_four_sea(shared_ctx: dict[str, Any]) -> None:
+    _capture_lp(
+        shared_ctx,
+        lambda: Problem.from_lp(
+            _FOUR_SEA_DIR / "master.cplex",
+            [
+                _FOUR_SEA_DIR / "subprob_1.cplex",
+                _FOUR_SEA_DIR / "subprob_2.cplex",
+                _FOUR_SEA_DIR / "subprob_3.cplex",
+                _FOUR_SEA_DIR / "subprob_4.cplex",
+            ],
+        ),
+    )
+
+
+@when("I call Problem.from_lp_text with a simple two-block LP")
+def when_from_lp_text_simple(shared_ctx: dict[str, Any]) -> None:
+    _capture_lp(
+        shared_ctx,
+        lambda: Problem.from_lp_text(_BDD_MASTER_2BLOCK, [_BDD_SUB_BLOCK0, _BDD_SUB_BLOCK1]),
+    )
+
+
+@when("I solve the loaded LP problem")
+def when_solve_loaded_lp(shared_ctx: dict[str, Any]) -> None:
+    problem: Problem | None = shared_ctx.get("lp_problem")
+    assert problem is not None, (
+        f"No LP problem loaded (exception: {shared_ctx.get('lp_exception')!r})"
+    )
+    shared_ctx["lp_result"] = solve(problem)
+
+
+@when("I solve the four_sea problem via from_lp and via from_file")
+def when_solve_four_sea_both_formats(shared_ctx: dict[str, Any]) -> None:
+    four_sea_json = _FIXTURES_DIR / "ref_four_sea.json"
+    if not four_sea_json.exists():
+        pytest.skip("ref_four_sea.json fixture not available")
+    lp_problem = Problem.from_lp(
+        _FOUR_SEA_DIR / "master.cplex",
+        [
+            _FOUR_SEA_DIR / "subprob_1.cplex",
+            _FOUR_SEA_DIR / "subprob_2.cplex",
+            _FOUR_SEA_DIR / "subprob_3.cplex",
+            _FOUR_SEA_DIR / "subprob_4.cplex",
+        ],
+    )
+    json_problem = Problem.from_file(four_sea_json)
+    shared_ctx["lp_obj"] = solve(lp_problem).objective
+    shared_ctx["json_obj"] = solve(json_problem).objective
+
+
+@when("I call Problem.from_lp with a nonexistent master path")
+def when_from_lp_nonexistent(shared_ctx: dict[str, Any], tmp_path: Path) -> None:
+    exc: Exception | None = None
+    try:
+        Problem.from_lp(tmp_path / "ghost.cplex", [tmp_path / "ghost_sub.cplex"])
+    except DWSolverInputError as e:
+        exc = e
+    shared_ctx["lp_exception"] = exc
+
+
+# ---------------------------------------------------------------------------
+# US3 — Additional error handling: When steps
+# ---------------------------------------------------------------------------
+
+
+@when("I call Problem.from_lp_text with a master that has an empty Subject To")
+def when_from_lp_text_empty_subject_to(shared_ctx: dict[str, Any]) -> None:
+    exc: Exception | None = None
+    try:
+        Problem.from_lp_text(_BDD_MASTER_EMPTY_SUBJECT_TO, [_BDD_SUB_VALID])
+    except DWSolverInputError as e:
+        exc = e
+    shared_ctx["lp_exception"] = exc
+
+
+@when("I call Problem.from_lp_text with a subproblem that has an empty Bounds section")
+def when_from_lp_text_empty_bounds(shared_ctx: dict[str, Any]) -> None:
+    exc: Exception | None = None
+    try:
+        Problem.from_lp_text(_BDD_MASTER_2BLOCK, [_BDD_SUB_EMPTY_BOUNDS])
+    except DWSolverInputError as e:
+        exc = e
+    shared_ctx["lp_exception"] = exc
+
+
+@when("I call Problem.from_lp_text with two subproblems that share a variable name")
+def when_from_lp_text_dup_var(shared_ctx: dict[str, Any]) -> None:
+    exc: Exception | None = None
+    try:
+        Problem.from_lp_text(_BDD_MASTER_DUP, [_BDD_SUB_DUP, _BDD_SUB_DUP])
+    except DWSolverInputError as e:
+        exc = e
+    shared_ctx["lp_exception"] = exc
+
+
+@when("I call Problem.from_lp_text with a master referencing an undeclared variable")
+def when_from_lp_text_phantom(shared_ctx: dict[str, Any]) -> None:
+    exc: Exception | None = None
+    try:
+        Problem.from_lp_text(_BDD_MASTER_PHANTOM, [_BDD_SUB_KNOWN])
+    except DWSolverInputError as e:
+        exc = e
+    shared_ctx["lp_exception"] = exc
+
+
+# ---------------------------------------------------------------------------
+# US2 + US3 — Library API: Then steps
+# ---------------------------------------------------------------------------
+
+
+@then(parsers.parse("a Problem object with {n:d} blocks is returned"))
+def then_problem_with_n_blocks(n: int, shared_ctx: dict[str, Any]) -> None:
+    problem = shared_ctx.get("lp_problem")
+    assert problem is not None, (
+        f"Expected a Problem but got None (exception: {shared_ctx.get('lp_exception')!r})"
+    )
+    assert isinstance(problem, Problem)
+    assert len(problem.blocks) == n, f"Expected {n} blocks, got {len(problem.blocks)}"
+
+
+@then(parsers.parse('the Problem block {n:d} has id "{expected_id}"'))
+def then_block_has_id(n: int, expected_id: str, shared_ctx: dict[str, Any]) -> None:
+    problem: Problem = shared_ctx["lp_problem"]
+    actual = problem.blocks[n].block_id
+    assert actual == expected_id, f"Expected block {n} id={expected_id!r}, got {actual!r}"
+
+
+@then(parsers.parse('the LP solve status is "{status}"'))
+def then_lp_solve_status(status: str, shared_ctx: dict[str, Any]) -> None:
+    result = shared_ctx.get("lp_result")
+    assert result is not None, "No LP solve result in context"
+    assert result.status == status, f"Expected status={status!r}, got {result.status!r}"
+
+
+@then(parsers.parse("the LP solve objective is approximately {value:g}"))
+def then_lp_solve_objective(value: float, shared_ctx: dict[str, Any]) -> None:
+    result = shared_ctx.get("lp_result")
+    assert result is not None, "No LP solve result in context"
+    obj = result.objective
+    assert obj is not None, "Result has no objective value"
+    assert abs(obj - value) < 1e-3, f"Expected objective ≈ {value}, got {obj}"
+
+
+@then("the two solve objectives agree within 1e-6")
+def then_objectives_agree(shared_ctx: dict[str, Any]) -> None:
+    lp_obj = shared_ctx.get("lp_obj")
+    json_obj = shared_ctx.get("json_obj")
+    assert lp_obj is not None and json_obj is not None
+    assert math.isclose(lp_obj, json_obj, abs_tol=1e-6), (
+        f"Objectives differ: LP={lp_obj}, JSON={json_obj}"
+    )
+
+
+@then("a DWSolverInputError is raised from the LP loader")
+def then_lp_loader_error(shared_ctx: dict[str, Any]) -> None:
+    exc = shared_ctx.get("lp_exception")
+    assert exc is not None, "Expected DWSolverInputError to be raised but no exception was caught"
+    assert isinstance(exc, DWSolverInputError), (
+        f"Expected DWSolverInputError, got {type(exc).__name__}: {exc}"
     )
