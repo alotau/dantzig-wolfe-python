@@ -321,9 +321,6 @@ class _RefCase:
     filename: str
     expected_obj: float
     expected_vars: dict[str, float] = field(default_factory=dict)
-    # When True, only assert the objective is finite and positive (multiple
-    # optimal bases exist so the exact value is solver-dependent).
-    finite_positive_only: bool = False
 
 
 _CASES: list[_RefCase] = [
@@ -338,10 +335,10 @@ _CASES: list[_RefCase] = [
         expected_vars={"x1": 8.3333, "x2": 3.3333, "y1": 10.0, "y2": 5.0},
     ),
     _RefCase(
-        # Multiple optimal bases — verify objective is finite and positive only.
+        # Multiple optimal bases — variable assignments non-deterministic;
+        # known optimal = 1208/19 ≈ 63.5789.
         "ref_book_dantzig.json",
-        expected_obj=0.0,  # unused when finite_positive_only=True
-        finite_positive_only=True,
+        expected_obj=63.5789,
     ),
     _RefCase(
         "ref_web_mitchell.json",
@@ -385,10 +382,6 @@ class TestSC001Regression:
         result = solve(Problem.from_file(FIXTURES / case.filename))
         assert result.status == SolveStatus.OPTIMAL
         assert result.objective is not None
-        if case.finite_positive_only:
-            assert math.isfinite(result.objective)
-            assert result.objective > 0
-        else:
-            assert math.isclose(result.objective, case.expected_obj, abs_tol=0.01)
+        assert math.isclose(result.objective, case.expected_obj, abs_tol=0.01)
         for var, expected in case.expected_vars.items():
             assert math.isclose(result.variable_values[var], expected, abs_tol=0.01)
