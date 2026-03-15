@@ -43,7 +43,7 @@ dwsolver master.lp sub1.lp sub2.lp
 dwsolver master.lp sub1.lp --output results/solution.json  # explicit output path
 dwsolver master.lp sub1.lp --workers 8                     # parallel subproblem solves
 dwsolver master.lp sub1.lp --tolerance 1e-4                # custom convergence tolerance
-dwsolver master.lp sub1.lp --format json                   # override auto-detection
+dwsolver master.lp sub1.lp --format lp                     # override auto-detection
 ```
 
 **Format detection**: File extension determines format (`.json` → JSON; `.lp` or `.cplex` → CPLEX LP).
