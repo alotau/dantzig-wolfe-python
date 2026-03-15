@@ -593,9 +593,11 @@ class TestCrossFormatRegression:
     Only the objective value must agree (SC-002).
 
     Problems covered:
-      bertsimas  — 1 block, no local constraints, bounded variables, obj=-21.5
-      trick      — 2 blocks, local constraints, unbounded variables, obj=-40.0
-      lasdon     — 2 blocks, local constraints, unbounded variables, obj≈-36.667
+      bertsimas          — 1 block, no local constraints, bounded variables, obj=-21.5
+      trick              — 2 blocks, local constraints, unbounded variables, obj=-40.0
+      lasdon             — 2 blocks, local constraints, unbounded variables, obj≈-36.667
+      bertsimas_double   — 2 blocks, block_0={x1}, block_1={x2,x3}, obj=-21.5
+      bertsimas_triple   — 3 blocks, block_0={x1}, block_1={x2}, block_2={x3}, obj=-21.5
     """
 
     def _run(
@@ -656,4 +658,24 @@ class TestCrossFormatRegression:
             _FIXTURES_DIR / "ref_book_lasdon.json",
             expected=-110 / 3,
             tol=1e-3,
+        )
+
+    def test_bertsimas_double_lp_matches_json(self) -> None:
+        """2-block: block_0={x1}, block_1={x2,x3}. Known optimal: -21.5."""
+        d = _FIXTURES_DIR / "bertsimas_lp_double"
+        self._run(
+            d / "master.lp",
+            [d / "subprob_0.lp", d / "subprob_1.lp"],
+            _FIXTURES_DIR / "ref_book_bertsimas_double.json",
+            expected=-21.5,
+        )
+
+    def test_bertsimas_triple_lp_matches_json(self) -> None:
+        """3-block: block_0={x1}, block_1={x2}, block_2={x3}. Known optimal: -21.5."""
+        d = _FIXTURES_DIR / "bertsimas_lp_triple"
+        self._run(
+            d / "master.lp",
+            [d / "subprob_0.lp", d / "subprob_1.lp", d / "subprob_2.lp"],
+            _FIXTURES_DIR / "ref_book_bertsimas_triple.json",
+            expected=-21.5,
         )
