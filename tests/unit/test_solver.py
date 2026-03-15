@@ -338,10 +338,10 @@ _CASES: list[_RefCase] = [
         expected_vars={"x1": 8.3333, "x2": 3.3333, "y1": 10.0, "y2": 5.0},
     ),
     _RefCase(
-        # Multiple optimal bases — verify objective is finite and positive only.
+        # Multiple optimal bases — variable assignments non-deterministic;
+        # known optimal = 1208/19 ≈ 63.5789.
         "ref_book_dantzig.json",
-        expected_obj=0.0,  # unused when finite_positive_only=True
-        finite_positive_only=True,
+        expected_obj=63.5789,
     ),
     _RefCase(
         "ref_web_mitchell.json",
