@@ -63,3 +63,57 @@ Feature: CLI — CPLEX LP Input Format
     When I run "dwsolver --format xyz simple_two_block.json"
     Then the exit code is non-zero
     And an error message is written to stderr
+
+  # ---------------------------------------------------------------------------
+  # US2: Library API for CPLEX LP problems
+  # ---------------------------------------------------------------------------
+
+  Scenario: Problem.from_lp returns a validated Problem object
+    Given the four_sea CPLEX LP fixtures are available
+    When I call Problem.from_lp with the four_sea master and subproblem files
+    Then a Problem object with 4 blocks is returned
+
+  Scenario: Problem.from_lp_text returns a Problem from in-memory strings
+    When I call Problem.from_lp_text with a simple two-block LP
+    Then a Problem object with 2 blocks is returned
+
+  Scenario: Block IDs are assigned in subproblem argument order
+    When I call Problem.from_lp_text with a simple two-block LP
+    Then the Problem block 0 has id "block_0"
+    And the Problem block 1 has id "block_1"
+
+  Scenario: Solving a Problem loaded via from_lp returns an optimal result
+    Given the four_sea CPLEX LP fixtures are available
+    When I call Problem.from_lp with the four_sea master and subproblem files
+    And I solve the loaded LP problem
+    Then the LP solve status is "optimal"
+    And the LP solve objective is approximately 12.0
+
+  Scenario: Cross-format: objectives from from_lp and from_file agree within 1e-6
+    Given the four_sea CPLEX LP fixtures are available
+    When I solve the four_sea problem via from_lp and via from_file
+    Then the two solve objectives agree within 1e-6
+
+  Scenario: Problem.from_lp raises DWSolverInputError for a missing master file
+    When I call Problem.from_lp with a nonexistent master path
+    Then a DWSolverInputError is raised from the LP loader
+
+  # ---------------------------------------------------------------------------
+  # US3: Additional error handling (library API paths)
+  # ---------------------------------------------------------------------------
+
+  Scenario: Error when master Subject To section contains no constraints
+    When I call Problem.from_lp_text with a master that has an empty Subject To
+    Then a DWSolverInputError is raised from the LP loader
+
+  Scenario: Error when subproblem Bounds section declares no variables
+    When I call Problem.from_lp_text with a subproblem that has an empty Bounds section
+    Then a DWSolverInputError is raised from the LP loader
+
+  Scenario: Error when a variable appears in two subproblem Bounds sections
+    When I call Problem.from_lp_text with two subproblems that share a variable name
+    Then a DWSolverInputError is raised from the LP loader
+
+  Scenario: Error when master constraint references a variable not in any subproblem
+    When I call Problem.from_lp_text with a master referencing an undeclared variable
+    Then a DWSolverInputError is raised from the LP loader
