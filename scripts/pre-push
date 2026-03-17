@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Git pre-push hook: runs ruff format --check and ruff lint before every push.
+# If either check fails, the push is aborted with a helpful message.
+#
+# Install via:  bash scripts/install-hooks.sh
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+# Prefer the venv ruff if present so the version matches CI.
+RUFF="${REPO_ROOT}/.venv/bin/ruff"
+if [[ ! -x "$RUFF" ]]; then
+    RUFF="ruff"
+fi
+
+echo "pre-push: running ruff format --check ..."
+if ! "$RUFF" format --check .; then
+    echo ""
+    echo "  ✗ ruff format check failed."
+    echo "  Run:  ruff format ."
+    echo "  Then re-stage, commit, and push."
+    exit 1
+fi
+
+echo "pre-push: running ruff check ..."
+if ! "$RUFF" check .; then
+    echo ""
+    echo "  ✗ ruff lint check failed."
+    echo "  Run:  ruff check --fix ."
+    echo "  Then re-stage, commit, and push."
+    exit 1
+fi
+
+echo "pre-push: all checks passed."

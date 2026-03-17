@@ -17,6 +17,8 @@ Or from source:
 git clone https://github.com/alotau/dwsolver-vibes
 cd dwsolver-vibes
 pip install -e ".[dev]"
+# Install git hooks (runs ruff format + lint before every push)
+bash scripts/install-hooks.sh
 ```
 
 Requires Python 3.11+ and automatically installs [`highspy`](https://pypi.org/project/highspy/) (the HiGHS LP solver).
