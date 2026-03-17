@@ -28,7 +28,7 @@ from dwsolver import Problem, SolveStatus, solve
 # ---------------------------------------------------------------------------
 
 _FIXTURES = Path(__file__).parent.parent / "fixtures"
-_FOUR_SEA  = _FIXTURES / "four_sea"
+_FOUR_SEA = _FIXTURES / "four_sea"
 _EIGHT_SEA = _FIXTURES / "eight_sea"
 
 # Both decompositions share the same master problem.
@@ -65,7 +65,7 @@ def test_four_and_eight_sea_same_optimal(
 ) -> None:
     """Workers 1–4 on four_sea and 1–8 on eight_sea all reach objective=12.0."""
     for label, problem, worker_counts in [
-        ("four_sea",  four_sea_problem,  [1, 2, 3, 4]),
+        ("four_sea", four_sea_problem, [1, 2, 3, 4]),
         ("eight_sea", eight_sea_problem, [1, 2, 3, 4, 5, 6, 7, 8]),
     ]:
         for w in worker_counts:
@@ -74,8 +74,7 @@ def test_four_and_eight_sea_same_optimal(
                 f"{label} workers={w}: expected OPTIMAL, got {result.status}"
             )
             assert result.objective == pytest.approx(_KNOWN_OPTIMAL), (
-                f"{label} workers={w}: expected objective={_KNOWN_OPTIMAL}, "
-                f"got {result.objective}"
+                f"{label} workers={w}: expected objective={_KNOWN_OPTIMAL}, got {result.objective}"
             )
 
 
@@ -108,17 +107,16 @@ def _run_timing(problem: Problem, worker_counts: list[int]) -> list[CellResult]:
     return cells
 
 
-def _print_timing_table(label: str, n_blocks: int, worker_counts: list[int],
-                        cells: list[CellResult]) -> None:
+def _print_timing_table(
+    label: str, n_blocks: int, worker_counts: list[int], cells: list[CellResult]
+) -> None:
     config = BenchConfig(
         subproblems=range(n_blocks, n_blocks + 1),
         worker_counts=worker_counts,
     )
     matrix = BenchMatrix(cells=[cells], config=config)
     table = format_table(matrix)
-    table = table.replace("Subproblems", "Problem   ").replace(
-        f"\n{n_blocks:>3}", f"\n{label}"
-    )
+    table = table.replace("Subproblems", "Problem   ").replace(f"\n{n_blocks:>3}", f"\n{label}")
     print("\n" + table, file=sys.stderr)
 
 
