@@ -116,8 +116,10 @@ def _print_timing_table(
     )
     matrix = BenchMatrix(cells=[cells], config=config)
     table = format_table(matrix)
-    table = table.replace("Subproblems", "Problem   ").replace(f"\n{n_blocks:>3}", f"\n{label}")
-    print("\n" + table, file=sys.stderr)
+    # Print the fixture label separately to avoid rewriting the formatted table,
+    # which relies on fixed-width alignment for its columns.
+    print(f"\n{label}", file=sys.stderr)
+    print(table, file=sys.stderr)
 
 
 # ---------------------------------------------------------------------------
