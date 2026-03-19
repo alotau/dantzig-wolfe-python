@@ -13,6 +13,9 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write       # push badge JSON to python-coverage-comment-action-data branch
+      pull-requests: write  # post coverage comment on PRs
     strategy:
       matrix:
         python-version: ["3.11", "3.12"]
@@ -38,7 +41,7 @@ jobs:
         run: mypy src/
 
       - name: Unit tests
-        run: pytest tests/unit/ -v
+        run: pytest tests/unit/ -v --no-cov
 
       - name: BDD tests
         # Exit code 5 = no tests collected (BDD steps added incrementally); treat as pass.
@@ -46,8 +49,75 @@ jobs:
         # we can capture $? and branch on it.
         run: |
           set +e
-          pytest tests/bdd/ -v
+          pytest tests/bdd/ -v --no-cov
           code=$?
           set -e
           if [ "$code" -eq 5 ]; then exit 0; fi
           exit "$code"
+
+      - name: Full test suite with coverage
+        # Runs all tests and enforces fail_under=90 via [tool.coverage.report] in pyproject.toml.
+        # Produces coverage.xml used by the badge step below.
+        run: pytest tests/
+
+      - name: Coverage comment
+        # Only post/update badge on one Python version to avoid race conditions.
+        if: matrix.python-version == '3.12'
+        uses: py-cov-action/python-coverage-comment-action@v3
+        with:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: BDD report — run BDD suite with JUnit output
+        # Produces .bdd-results.xml consumed by the badge and traceability steps.
+        # Only runs on Python 3.12 on main to avoid redundant badge commits.
+        if: matrix.python-version == '3.12'
+        run: |
+          set +e
+          pytest tests/bdd/ --junitxml=.bdd-results.xml --no-cov -q
+          code=$?
+          set -e
+          if [ "$code" -eq 5 ]; then exit 0; fi
+          exit "$code"
+
+      - name: BDD report — generate badge JSON and traceability report
+        if: matrix.python-version == '3.12'
+        run: |
+          python scripts/bdd_report.py \
+            --junit .bdd-results.xml \
+            --features specs/001-gherkin-bdd-specs/features \
+            --badge-output bdd-badge.json \
+            --report-output bdd-traceability.md || true
+          # '|| true' so that failing scenarios don't block the artifact upload step;
+          # the non-zero exit is surfaced in the BDD tests step above.
+
+      - name: BDD report — commit badge JSON to data branch
+        if: >-
+          matrix.python-version == '3.12' &&
+          github.event_name == 'push' &&
+          github.ref == 'refs/heads/main'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin python-coverage-comment-action-data 2>/dev/null || true
+          # Use a detached worktree so we don't disturb the main working tree.
+          if git show-ref --quiet refs/remotes/origin/python-coverage-comment-action-data; then
+            git worktree add /tmp/data-branch origin/python-coverage-comment-action-data
+          else
+            git worktree add --orphan -b python-coverage-comment-action-data /tmp/data-branch
+          fi
+          cp bdd-badge.json /tmp/data-branch/bdd-badge.json
+          cd /tmp/data-branch
+          git add bdd-badge.json
+          git diff --cached --quiet || git commit -m "chore: update bdd-badge.json [skip ci]"
+          git push origin HEAD:python-coverage-comment-action-data
+
+      - name: BDD report — upload traceability report as artifact
+        if: >-
+          matrix.python-version == '3.12' &&
+          github.event_name == 'push' &&
+          github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: bdd-traceability-report
+          path: bdd-traceability.md
+          if-no-files-found: warn
