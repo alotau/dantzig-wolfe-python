@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 import math
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from pydantic import ValidationError
@@ -290,6 +291,11 @@ class TestMaster:
         with pytest.raises((DWSolverInputError, ValidationError)):
             Master.model_validate({"constraint_names": ["c", "d"], "rhs": [1.0], "senses": [">="]})
 
+    def test_senses_length_mismatch_raises(self) -> None:
+        # rhs length correct, senses length wrong → triggers the senses check
+        with pytest.raises((DWSolverInputError, ValidationError)):
+            Master.model_validate({"constraint_names": ["c"], "rhs": [1.0], "senses": ["<=", ">="]})
+
     def test_extra_fields_ignored(self) -> None:
         m = Master.model_validate({**VALID_MASTER, "extra": True})
         assert not hasattr(m, "extra")
@@ -453,6 +459,16 @@ class TestProblemFromFile:
         fixture = Path(__file__).parent.parent / "fixtures" / "unbounded_problem.json"
         p = Problem.from_file(fixture)
         assert len(p.blocks) >= 1
+
+    def test_oserror_on_read_raises(self, tmp_path: Path) -> None:
+        # File must exist so FileNotFoundError is not raised; OSError covers e.g. permission denied
+        f = tmp_path / "problem.json"
+        f.write_text("{}", encoding="utf-8")
+        with (
+            patch("pathlib.Path.read_text", side_effect=OSError("permission denied")),
+            pytest.raises(DWSolverInputError, match="Error reading"),
+        ):
+            Problem.from_file(f)
 
 
 # ---------------------------------------------------------------------------
