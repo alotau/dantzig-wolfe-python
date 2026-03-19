@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 
 import pytest
+
 from benchmarks.models import BenchConfig, BenchMatrix, CellError, CellResult
 from dwsolver import SolveStatus
 
