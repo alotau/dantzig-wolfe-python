@@ -3,8 +3,8 @@
 A Python implementation of the **Dantzig-Wolfe decomposition algorithm** for block-angular linear programs.
 
 [![CI](https://github.com/alotau/dantzig-wolfe-python/actions/workflows/ci.yml/badge.svg)](https://github.com/alotau/dantzig-wolfe-python/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/alotau/dantzig-wolfe-python/python-coverage-comment-action-data/endpoint.json)](https://github.com/alotau/dantzig-wolfe-python/actions/workflows/ci.yml)
-[![BDD Scenarios](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/alotau/dantzig-wolfe-python/python-coverage-comment-action-data/bdd-badge.json)](https://github.com/alotau/dantzig-wolfe-python/actions/workflows/ci.yml)
+[![Coverage](https://raw.githubusercontent.com/alotau/dantzig-wolfe-python/python-coverage-comment-action-data/badge.svg)](https://htmlpreview.github.io/?https://github.com/alotau/dantzig-wolfe-python/blob/python-coverage-comment-action-data/htmlcov/index.html)
+[![BDD Scenarios](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/alotau/dantzig-wolfe-python/python-coverage-comment-action-data/bdd-badge.json&style=flat)](https://github.com/alotau/dantzig-wolfe-python/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
 ## Installation
