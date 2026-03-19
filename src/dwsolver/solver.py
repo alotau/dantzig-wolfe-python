@@ -486,7 +486,6 @@ def solve(
                 file=verbose_stream,
             )
 
-
     # Hit iteration limit
     if best_result is not None:
         return Result(

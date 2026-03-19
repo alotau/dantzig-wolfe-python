@@ -349,6 +349,4 @@ def then_verbose_diagnostics(shared_ctx: dict[str, Any]) -> None:
     """
     result = shared_ctx["result"]
     stderr = result.stderr or ""
-    assert "DW" in stderr, (
-        f"Expected DW diagnostic lines in CLI stderr output, got: {stderr!r}"
-    )
+    assert "DW" in stderr, f"Expected DW diagnostic lines in CLI stderr output, got: {stderr!r}"
