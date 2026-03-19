@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 
+import pytest
 from benchmarks.models import BenchConfig, BenchMatrix, CellError, CellResult
 from dwsolver import SolveStatus
 
@@ -118,9 +119,7 @@ def test_save_chart_writes_png_when_matplotlib_installed(tmp_path):
     Requires the optional [charts] extras group (``pip install dwsolver[charts]``).
     This test is intentionally skipped when matplotlib is absent.
     """
-    pytest = __import__("pytest")
-    matplotlib = pytest.importorskip("matplotlib", reason="requires dwsolver[charts]")
-    _ = matplotlib  # imported only for the skip guard
+    pytest.importorskip("matplotlib", reason="requires dwsolver[charts]")
 
     from benchmarks.table import save_chart
 
