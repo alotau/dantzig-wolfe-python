@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import re
 
+import pytest
+
 from benchmarks.models import BenchConfig, BenchMatrix, CellError, CellResult
 from dwsolver import SolveStatus
 
@@ -105,3 +107,25 @@ def test_format_table_all_optimal_no_err_tokens():
     result = format_table(_make_optimal_matrix())
     assert "ERR" not in result
     assert "TIMEOUT" not in result
+
+
+# ---------------------------------------------------------------------------
+# T002 — save_chart produces a PNG when matplotlib is installed
+# ---------------------------------------------------------------------------
+
+
+def test_save_chart_writes_png_when_matplotlib_installed(tmp_path):
+    """save_chart() must create a PNG file at the given path.
+
+    Requires the optional [charts] extras group (``pip install dwsolver[charts]``).
+    This test is intentionally skipped when matplotlib is absent.
+    """
+    pytest.importorskip("matplotlib", reason="requires dwsolver[charts]")
+
+    from benchmarks.table import save_chart
+
+    output_png = tmp_path / "bench.png"
+    save_chart(_make_optimal_matrix(), output_png)
+
+    assert output_png.exists(), "save_chart() did not create a PNG file"
+    assert output_png.stat().st_size > 0, "PNG file is empty"

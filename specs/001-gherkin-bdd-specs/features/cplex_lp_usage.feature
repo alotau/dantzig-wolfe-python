@@ -3,6 +3,10 @@ Feature: CLI — CPLEX LP Input Format
   I want to invoke the solver from the command line with a master file and subproblem files,
   So that I can obtain the same solution output as the JSON workflow.
 
+  # NOTE: Scenario steps use the form "dwsolver solve FILE" for readability.
+  # The actual CLI is a flat command: dwsolver [OPTIONS] FILES...
+  # The "solve" token is stripped by the _invoke() helper in test_cplex_lp_usage.py.
+
   Background:
     Given the dwsolver command is available on the PATH
 

@@ -3,6 +3,9 @@ Feature: Python Library Interface — Dantzig-Wolfe Solver
   I want to import the dwsolver package and call it programmatically,
   So that I can integrate the solver into automated workflows without using the CLI.
 
+  # NOTE: CLI-style phrasing in some scenario steps is for human readability only.
+  # Steps are implemented directly against the Python API in test_library_usage.py.
+
   # ---------------------------------------------------------------------------
   # Successful solve scenarios
   # ---------------------------------------------------------------------------

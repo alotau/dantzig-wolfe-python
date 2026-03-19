@@ -99,6 +99,10 @@ def _invoke(
             args += [part, parts[i + 1]]
             i += 2
 
+        elif part in ("--verbose", "-v"):
+            args.append(part)
+            i += 1
+
         elif not part.startswith("-"):
             # Positional: problem file.  Try to resolve against the fixtures
             # directory; if the fixture exists, copy it to *tmp_path* so the
@@ -306,17 +310,16 @@ def then_tolerance_recorded(tol: float, shared_ctx: dict[str, Any]) -> None:
 
 @then("an error message is written to stderr")
 def then_stderr_has_message(shared_ctx: dict[str, Any]) -> None:
-    # Click 8.3 CliRunner merges stderr into output
     result = shared_ctx["result"]
-    assert result.output and len(result.output.strip()) > 0, "Expected non-empty error output"
+    stderr = result.stderr or ""
+    assert stderr.strip(), "Expected non-empty error output on stderr"
 
 
 @then("an error message is written to stderr mentioning the missing file")
 def then_stderr_mentions_missing(shared_ctx: dict[str, Any]) -> None:
     result = shared_ctx["result"]
-    assert result.output and len(result.output.strip()) > 0, (
-        "Expected non-empty error output mentioning missing file"
-    )
+    stderr = result.stderr or ""
+    assert stderr.strip(), "Expected non-empty error output mentioning missing file on stderr"
 
 
 @then("no solution file is created")
@@ -336,3 +339,14 @@ def then_both_objectives_equal(shared_ctx: dict[str, Any]) -> None:
     objs = shared_ctx.get("objective_values", [])
     assert len(objs) == 2, f"Expected 2 recorded objective values, got: {objs!r}"
     assert abs(objs[0] - objs[1]) < 1e-6, f"Objective values differ: {objs[0]} vs {objs[1]}"
+
+
+@then("solver diagnostic lines are written to the output")
+def then_verbose_diagnostics(shared_ctx: dict[str, Any]) -> None:
+    """Verbose mode emits per-iteration DW diagnostic lines to stderr.
+
+    With ``mix_stderr=False`` we must read diagnostics from ``result.stderr``.
+    """
+    result = shared_ctx["result"]
+    stderr = result.stderr or ""
+    assert "DW" in stderr, f"Expected DW diagnostic lines in CLI stderr output, got: {stderr!r}"

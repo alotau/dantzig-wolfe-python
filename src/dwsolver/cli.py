@@ -79,12 +79,20 @@ def _detect_format(files: tuple[str, ...], fmt: str | None) -> str:
     show_default=True,
     help="DW convergence tolerance",
 )
+@click.option(
+    "--verbose",
+    "-v",
+    is_flag=True,
+    default=False,
+    help="Emit per-iteration solver diagnostics to stderr.",
+)
 def main(
     files: tuple[str, ...],
     fmt: str | None,
     output: str | None,
     workers: int | None,
     tolerance: float,
+    verbose: bool,
 ) -> None:
     """Solve a block-angular LP using Dantzig-Wolfe decomposition.
 
@@ -109,7 +117,12 @@ def main(
         click.echo(str(exc), err=True)
         sys.exit(1)
 
-    result = solve(problem, workers=workers, tolerance=tolerance)
+    result = solve(
+        problem,
+        workers=workers,
+        tolerance=tolerance,
+        verbose_stream=sys.stderr if verbose else None,
+    )
 
     first = Path(files[0])
     out_path = str(first.parent / f"{first.stem}.solution.json") if output is None else output

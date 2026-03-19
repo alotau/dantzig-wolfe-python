@@ -178,3 +178,10 @@ mypy src/                 # type check
 ruff check src/ tests/    # lint
 ruff format src/ tests/   # format
 ```
+
+To enable the optional `--save-chart` heatmap output from the benchmark runner:
+
+```bash
+pip install -e ".[charts]"
+python -m benchmarks --save-chart bench.png
+```
