@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Git pre-push hook: runs ruff format --check and ruff lint before every push.
-# If either check fails, the push is aborted with a helpful message.
+# Git pre-push hook: runs ruff format --check, ruff lint, and mypy type checking
+# before every push. If any check fails, the push is aborted with a helpful message.
 #
 # Install via:  bash scripts/install-hooks.sh
 set -euo pipefail
@@ -29,6 +29,18 @@ if ! "$RUFF" check .; then
     echo "  ✗ ruff lint check failed."
     echo "  Run:  ruff check --fix ."
     echo "  Then re-stage, commit, and push."
+    exit 1
+fi
+
+echo "pre-push: running mypy src/ ..."
+MYPY="${REPO_ROOT}/.venv/bin/mypy"
+if [[ ! -x "$MYPY" ]]; then
+    MYPY="mypy"
+fi
+if ! "$MYPY" src/; then
+    echo ""
+    echo "  ✗ mypy type check failed."
+    echo "  Fix type errors and re-push."
     exit 1
 fi
 
