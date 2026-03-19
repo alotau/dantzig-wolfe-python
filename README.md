@@ -9,15 +9,11 @@ A Python implementation of the **Dantzig-Wolfe decomposition algorithm** for blo
 
 ## Installation
 
-```bash
-pip install dwsolver
-```
-
-Or from source:
+Install from source:
 
 ```bash
-git clone https://github.com/alotau/dwsolver-vibes
-cd dwsolver-vibes
+git clone https://github.com/alotau/dantzig-wolfe-python
+cd dantzig-wolfe-python
 pip install -e ".[dev]"
 # Install git hooks (runs ruff format + lint before every push)
 bash scripts/install-hooks.sh
