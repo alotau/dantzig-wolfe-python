@@ -50,7 +50,7 @@ absent import.
 
 ```
 cli.py  --verbose flag
-  └─ solve(problem, verbose=True, verbose_stream=sys.stderr)
+  └─ solve(problem, verbose_stream=...)
        └─ solver.py  _solve_inner() column-generation loop
             └─ emits lines: "iter N | phase P | cols C | gap G"
 ```
