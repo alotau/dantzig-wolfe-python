@@ -66,6 +66,8 @@ jobs:
         uses: py-cov-action/python-coverage-comment-action@v3
         with:
           GITHUB_TOKEN: ${{ github.token }}
+          MINIMUM_GREEN: 90
+          MINIMUM_ORANGE: 70
 
       - name: BDD report — run BDD suite with JUnit output
         # Produces .bdd-results.xml consumed by the badge and traceability steps.
