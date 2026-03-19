@@ -158,7 +158,7 @@ def test_parse_junit_xml_classname_stripping(tmp_path: Path) -> None:
     p = tmp_path / "results.xml"
     p.write_text(
         '<?xml version="1.0" encoding="utf-8"?>'
-        "<testsuites><testsuite tests=\"1\">"
+        '<testsuites><testsuite tests="1">'
         '<testcase classname="tests.bdd.steps.test_my_feature" name="t" />'
         "</testsuite></testsuites>"
     )
@@ -285,14 +285,12 @@ def test_main_creates_badge_and_report(tmp_path: Path) -> None:
     """main() reads JUnit XML + features dir and writes both output files."""
     features_dir = tmp_path / "features"
     features_dir.mkdir()
-    (features_dir / "example.feature").write_text(
-        "Feature: Ex\n  Scenario: S1\n    Given g\n"
-    )
+    (features_dir / "example.feature").write_text("Feature: Ex\n  Scenario: S1\n    Given g\n")
 
     junit_xml = tmp_path / "results.xml"
     junit_xml.write_text(
         '<?xml version="1.0" encoding="utf-8"?>'
-        "<testsuites><testsuite tests=\"1\">"
+        '<testsuites><testsuite tests="1">'
         '<testcase classname="tests.bdd.steps.test_example" name="test_s1" />'
         "</testsuite></testsuites>"
     )
@@ -336,7 +334,7 @@ def test_main_exits_nonzero_on_failing_scenarios(tmp_path: Path) -> None:
     junit_xml = tmp_path / "results.xml"
     junit_xml.write_text(
         '<?xml version="1.0" encoding="utf-8"?>'
-        "<testsuites><testsuite tests=\"2\">"
+        '<testsuites><testsuite tests="2">'
         '<testcase classname="tests.bdd.steps.test_example" name="test_s1" />'
         '<testcase classname="tests.bdd.steps.test_example" name="test_s2">'
         "<failure>oops</failure>"
