@@ -96,17 +96,25 @@ jobs:
           github.event_name == 'push' &&
           github.ref == 'refs/heads/main'
         run: |
+          # Clone the data branch into a standalone directory (no shared object store).
+          DATA_DIR=$(mktemp -d)
+          if git ls-remote --exit-code origin python-coverage-comment-action-data; then
+            git clone --depth=1 --branch python-coverage-comment-action-data \
+              "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" \
+              "$DATA_DIR"
+          else
+            git clone --depth=1 \
+              "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" \
+              "$DATA_DIR"
+            cd "$DATA_DIR"
+            git checkout --orphan python-coverage-comment-action-data
+            git rm -rf . --quiet
+            cd -
+          fi
+          cp bdd-badge.json "$DATA_DIR/bdd-badge.json"
+          cd "$DATA_DIR"
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin python-coverage-comment-action-data 2>/dev/null || true
-          # Use a detached worktree so we don't disturb the main working tree.
-          if git show-ref --quiet refs/remotes/origin/python-coverage-comment-action-data; then
-            git worktree add /tmp/data-branch origin/python-coverage-comment-action-data
-          else
-            git worktree add --orphan -b python-coverage-comment-action-data /tmp/data-branch
-          fi
-          cp bdd-badge.json /tmp/data-branch/bdd-badge.json
-          cd /tmp/data-branch
           git add bdd-badge.json
           git diff --cached --quiet || git commit -m "chore: update bdd-badge.json [skip ci]"
           git push origin HEAD:python-coverage-comment-action-data
