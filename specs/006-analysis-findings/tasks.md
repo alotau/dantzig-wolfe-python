@@ -79,7 +79,7 @@ at least one iteration line to stderr and still produces a correct solution file
 - [X] T006 [P] [US2] Implement BDD step for the verbose scenario in
   `tests/bdd/steps/test_cli_usage.py` — confirm it **fails** before
   proceeding to implementation
-- [ ] T007 [P] [US2] Add unit test in `tests/unit/test_solver.py` asserting that
+- [X] T007 [P] [US2] Add unit test in `tests/unit/test_solver.py` asserting that
   `solve(..., verbose=True)` emits iteration lines to a provided stream
 
 ### Implementation for User Story 2
