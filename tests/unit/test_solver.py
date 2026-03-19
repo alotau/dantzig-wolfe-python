@@ -385,3 +385,49 @@ class TestSC001Regression:
         assert math.isclose(result.objective, case.expected_obj, abs_tol=0.01)
         for var, expected in case.expected_vars.items():
             assert math.isclose(result.variable_values[var], expected, abs_tol=0.01)
+
+
+# ---------------------------------------------------------------------------
+# T007 — verbose_stream emits per-iteration diagnostic lines
+# ---------------------------------------------------------------------------
+
+
+class TestVerboseMode:
+    """T007: solve() with a verbose_stream emits DW diagnostic lines."""
+
+    def test_verbose_stream_receives_diagnostic_lines(self) -> None:
+        """Passing a StringIO as verbose_stream results in DW iteration output."""
+        from io import StringIO
+
+        problem = _simple_two_block_problem()
+        stream = StringIO()
+        result = solve(problem, verbose_stream=stream)
+
+        assert result.status == SolveStatus.OPTIMAL
+        output = stream.getvalue()
+        assert "DW" in output, f"Expected DW diagnostic lines, got: {output!r}"
+        # At least one line must be present
+        assert len(output.strip().splitlines()) >= 1
+
+    def test_verbose_disabled_by_default_no_output(self) -> None:
+        """solve() without verbose_stream must not emit diagnostics."""
+        from io import StringIO
+
+        problem = _simple_two_block_problem()
+        # Passing None explicitly (same as default) should produce no output
+        stream = StringIO()
+        # Monkey-patch sys.stderr to confirm nothing leaks there
+        import sys
+
+        original_stderr = sys.stderr
+        sys.stderr = stream
+        try:
+            result = solve(problem)
+        finally:
+            sys.stderr = original_stderr
+
+        assert result.status == SolveStatus.OPTIMAL
+        # No DW diagnostic lines should have been written
+        assert "DW" not in stream.getvalue(), (
+            f"Unexpected verbose output on stderr: {stream.getvalue()!r}"
+        )

@@ -3,6 +3,11 @@ Feature: Command Line Interface — Dantzig-Wolfe Solver
   I want to invoke the DW solver from the command line with a structured input file,
   So that I can obtain an optimal solution or a clear explanation of why none exists.
 
+  # NOTE: Scenario steps use the form "dwsolver solve FILE" for readability.
+  # The actual CLI is a flat command: dwsolver [OPTIONS] FILES...
+  # The "solve" token is stripped by the _invoke() helper in test_cli_usage.py
+  # so every step works correctly against the real flat entry point.
+
   Background:
     Given the dwsolver command is available on the PATH
 
@@ -105,3 +110,14 @@ Feature: Command Line Interface — Dantzig-Wolfe Solver
     Then the exit code is 0
     And the solution file contains status "optimal"
     And the solution file records the tolerance value 1e-6
+
+  # ---------------------------------------------------------------------------
+  # Verbose diagnostic output
+  # ---------------------------------------------------------------------------
+
+  Scenario: Verbose output is emitted to stderr when --verbose is passed
+    Given a valid block-angular LP input file "simple_two_block.json"
+    When I run "dwsolver solve simple_two_block.json --verbose"
+    Then the exit code is 0
+    And the solution file contains status "optimal"
+    And solver diagnostic lines are written to the output

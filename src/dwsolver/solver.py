@@ -21,8 +21,10 @@ spawning more OS threads than there are subproblems.
 from __future__ import annotations
 
 import os
+import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
+from typing import IO
 
 from highspy import Highs, HighsModelStatus, kHighsInf
 
@@ -317,6 +319,7 @@ def solve(
     workers: int | None = DEFAULT_WORKERS,
     tolerance: float = DEFAULT_TOLERANCE,
     max_iterations: int = MAX_ITERATIONS,
+    verbose_stream: IO[str] | None = None,
 ) -> Result:
     """Solve a block-angular LP using Dantzig-Wolfe decomposition.
 
@@ -325,6 +328,9 @@ def solve(
         workers: Number of parallel subproblem workers. None → cpu_count * 2.
         tolerance: DW convergence tolerance (reduced-cost threshold).
         max_iterations: Maximum Phase II iterations before ITERATION_LIMIT.
+        verbose_stream: Optional writable stream for per-iteration diagnostic
+            lines.  Pass ``sys.stderr`` from the CLI or a ``StringIO`` in
+            tests.  ``None`` (default) produces no output.
 
     Returns:
         Result with status, objective, variable values, and iteration count.
@@ -396,6 +402,14 @@ def solve(
 
         phase1_iters += 1
 
+        if verbose_stream is not None:
+            art_sum = master.get_artificial_sum()
+            n_cols = len(master._columns)
+            print(
+                f"DW Phase I  iter {phase1_iters:4d} | cols {n_cols:4d} | art_sum {art_sum:.3e}",
+                file=verbose_stream,
+            )
+
     # Final Phase I check
     ms, _, _ = master.solve()
     if ms != "optimal" or master.get_artificial_sum() > tolerance:
@@ -457,9 +471,21 @@ def solve(
                     improving_any = True
 
         if not improving_any:
+            if verbose_stream is not None:
+                print(
+                    f"DW converged  iter {phase1_iters + phase2_iters:4d} | optimal obj {obj_val:.6g}",
+                    file=verbose_stream,
+                )
             return best_result  # converged
 
         phase2_iters += 1
+
+        if verbose_stream is not None:
+            n_cols = len(master._columns)
+            print(
+                f"DW Phase II iter {phase2_iters:4d} | cols {n_cols:4d} | obj {obj_val:.6g}",
+                file=verbose_stream,
+            )
 
     # Hit iteration limit
     if best_result is not None:

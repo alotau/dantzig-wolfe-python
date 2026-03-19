@@ -99,6 +99,10 @@ def _invoke(
             args += [part, parts[i + 1]]
             i += 2
 
+        elif part in ("--verbose", "-v"):
+            args.append(part)
+            i += 1
+
         elif not part.startswith("-"):
             # Positional: problem file.  Try to resolve against the fixtures
             # directory; if the fixture exists, copy it to *tmp_path* so the
@@ -336,3 +340,15 @@ def then_both_objectives_equal(shared_ctx: dict[str, Any]) -> None:
     objs = shared_ctx.get("objective_values", [])
     assert len(objs) == 2, f"Expected 2 recorded objective values, got: {objs!r}"
     assert abs(objs[0] - objs[1]) < 1e-6, f"Objective values differ: {objs[0]} vs {objs[1]}"
+
+
+@then("solver diagnostic lines are written to the output")
+def then_verbose_diagnostics(shared_ctx: dict[str, Any]) -> None:
+    """Verbose mode emits per-iteration DW diagnostic lines to stderr.
+
+    CliRunner merges stderr into result.output by default, so we check there.
+    """
+    result = shared_ctx["result"]
+    assert "DW" in result.output, (
+        f"Expected DW diagnostic lines in CLI output (stderr), got: {result.output!r}"
+    )
