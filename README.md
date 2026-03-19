@@ -168,6 +168,16 @@ from subproblem bounds.
 
 ---
 
+## Test Quality
+
+[![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/alotau/dantzig-wolfe-python/python-coverage-comment-action-data/endpoint.json)](https://github.com/alotau/dantzig-wolfe-python/actions/workflows/ci.yml)
+[![BDD Scenarios](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/alotau/dantzig-wolfe-python/python-coverage-comment-action-data/bdd-badge.json)](https://github.com/alotau/dantzig-wolfe-python/actions/workflows/ci.yml)
+
+- **Coverage**: percentage of source lines exercised by the full test suite. Updated automatically on every push to `main`.
+- **BDD Scenarios**: Gherkin scenario pass rate (`passed / total runtime instances`). Updated automatically on every push to `main`. A per-feature breakdown is available as the `bdd-traceability-report` artifact in the latest CI run.
+
+---
+
 ## Development
 
 ```bash

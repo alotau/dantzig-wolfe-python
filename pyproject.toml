@@ -17,6 +17,7 @@ dependencies = [
 dev = [
     "pytest",
     "pytest-bdd",
+    "pytest-cov",
     "ruff",
     "mypy",
     "highspy",
@@ -62,6 +63,24 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 bdd_features_base_dir = "specs/001-gherkin-bdd-specs/features"
+addopts = "--cov=dwsolver --cov-report=term-missing --cov-report=xml:coverage.xml"
 markers = [
     "slow: marks tests as slow (LP solves); deselect with -m 'not slow'",
+]
+
+# ---------------------------------------------------------------------------
+# Coverage.py — run + report config (T002, T003)
+# ---------------------------------------------------------------------------
+[tool.coverage.run]
+source = ["dwsolver"]
+omit = ["*/benchmarks/*", "*/tests/*"]
+relative_files = true
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "\\.\\.\\.",
 ]
