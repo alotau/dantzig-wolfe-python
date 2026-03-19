@@ -6,11 +6,11 @@
 |----------------------------- | -------: | -------: | ------: | --------: |
 | src/dwsolver/\_\_init\_\_.py |        4 |        0 |    100% |           |
 | src/dwsolver/cli.py          |        8 |        0 |    100% |           |
-| src/dwsolver/lp\_parser.py   |      282 |       10 |     96% |217, 224, 265, 272, 609-610, 632-633, 643-644 |
-| src/dwsolver/models.py       |      170 |        3 |     98% |164, 258-259 |
+| src/dwsolver/lp\_parser.py   |      282 |        4 |     99% |217, 224, 265, 272 |
+| src/dwsolver/models.py       |      170 |        0 |    100% |           |
 | src/dwsolver/solver.py       |      220 |       10 |     95% |165-168, 239, 346, 367, 438, 455, 484, 500 |
 | src/dwsolver/subproblem.py   |       51 |        0 |    100% |           |
-| **TOTAL**                    |  **735** |   **23** | **97%** |           |
+| **TOTAL**                    |  **735** |   **14** | **98%** |           |
 
 
 ## Setup coverage badge
