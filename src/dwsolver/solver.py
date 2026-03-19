@@ -481,11 +481,11 @@ def solve(
         phase2_iters += 1
 
         if verbose_stream is not None:
-            n_cols = len(master._columns)
             print(
-                f"DW Phase II iter {phase2_iters:4d} | cols {n_cols:4d} | obj {obj_val:.6g}",
+                f"DW Phase II iter {phase2_iters:4d} | obj {obj_val:.6g}",
                 file=verbose_stream,
             )
+
 
     # Hit iteration limit
     if best_result is not None:
