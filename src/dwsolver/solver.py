@@ -403,7 +403,7 @@ def solve(
 
         if verbose_stream is not None:
             art_sum = master.get_artificial_sum()
-            n_cols = len(master._columns)
+            n_cols = master.num_columns()
             print(
                 f"DW Phase I  iter {phase1_iters:4d} | cols {n_cols:4d} | art_sum {art_sum:.3e}",
                 file=verbose_stream,
