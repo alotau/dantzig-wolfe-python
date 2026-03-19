@@ -21,7 +21,6 @@ spawning more OS threads than there are subproblems.
 from __future__ import annotations
 
 import os
-import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from typing import IO
@@ -472,8 +471,9 @@ def solve(
 
         if not improving_any:
             if verbose_stream is not None:
+                total = phase1_iters + phase2_iters
                 print(
-                    f"DW converged  iter {phase1_iters + phase2_iters:4d} | optimal obj {obj_val:.6g}",
+                    f"DW converged  iter {total:4d} | optimal obj {obj_val:.6g}",
                     file=verbose_stream,
                 )
             return best_result  # converged
