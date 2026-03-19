@@ -3,6 +3,8 @@
 A Python implementation of the **Dantzig-Wolfe decomposition algorithm** for block-angular linear programs.
 
 [![CI](https://github.com/alotau/dantzig-wolfe-python/actions/workflows/ci.yml/badge.svg)](https://github.com/alotau/dantzig-wolfe-python/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/alotau/dantzig-wolfe-python/python-coverage-comment-action-data/endpoint.json)](https://github.com/alotau/dantzig-wolfe-python/actions/workflows/ci.yml)
+[![BDD Scenarios](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/alotau/dantzig-wolfe-python/python-coverage-comment-action-data/bdd-badge.json)](https://github.com/alotau/dantzig-wolfe-python/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
 ## Installation
@@ -165,16 +167,6 @@ End
 Variables are matched by name across master and subproblem files; those appearing in master
 coupling constraints form the linking structure automatically. Block variables are inferred
 from subproblem bounds.
-
----
-
-## Test Quality
-
-[![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/alotau/dantzig-wolfe-python/python-coverage-comment-action-data/endpoint.json)](https://github.com/alotau/dantzig-wolfe-python/actions/workflows/ci.yml)
-[![BDD Scenarios](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/alotau/dantzig-wolfe-python/python-coverage-comment-action-data/bdd-badge.json)](https://github.com/alotau/dantzig-wolfe-python/actions/workflows/ci.yml)
-
-- **Coverage**: percentage of source lines exercised by the full test suite. Updated automatically on every push to `main`.
-- **BDD Scenarios**: Gherkin scenario pass rate (`passed / total runtime instances`). Updated automatically on every push to `main`. A per-feature breakdown is available as the `bdd-traceability-report` artifact in the latest CI run.
 
 ---
 
