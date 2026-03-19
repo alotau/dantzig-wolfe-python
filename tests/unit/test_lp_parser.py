@@ -13,8 +13,10 @@ integration-level unit tests (parse real files, validate structure and counts).
 from __future__ import annotations
 
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
+from pydantic import ValidationError
 
 from dwsolver.lp_parser import (
     MasterLP,
@@ -468,6 +470,46 @@ class TestErrorPaths:
                 master_file,
                 [tmp_path / "nonexistent_sub.cplex"],
             )
+
+    def test_oserror_reading_master_raises(self, tmp_path: Path) -> None:
+        master_file = tmp_path / "master.cplex"
+        master_file.write_text(_SIMPLE_MASTER_LP, encoding="utf-8")
+        with (
+            patch("pathlib.Path.read_text", side_effect=OSError("permission denied")),
+            pytest.raises(DWSolverInputError, match="Error reading master"),
+        ):
+            load_problem_from_lp(master_file, [tmp_path / "sub.cplex"])
+
+    def test_oserror_reading_subproblem_raises(self, tmp_path: Path) -> None:
+        master_file = tmp_path / "master.cplex"
+        master_file.write_text(_SIMPLE_MASTER_LP, encoding="utf-8")
+        # First call (master) succeeds; second call (subproblem) raises OSError
+        with (
+            patch(
+                "pathlib.Path.read_text",
+                side_effect=[_SIMPLE_MASTER_LP, OSError("permission denied")],
+            ),
+            pytest.raises(DWSolverInputError, match="Error reading subproblem"),
+        ):
+            load_problem_from_lp(master_file, [tmp_path / "sub.cplex"])
+
+    def test_validation_error_in_assembly_raises(self) -> None:
+        # Obtain a real ValidationError instance, then patch Problem to raise it
+        # so that assemble_problem's except ValidationError branch is exercised
+        try:
+            Problem.model_validate({"blocks": []})
+        except ValidationError as ve:
+            payload = ve
+        else:
+            pytest.fail("Expected ValidationError from Problem.model_validate")
+        master_lp = parse_master(_SIMPLE_MASTER_LP)
+        sub1_lp = parse_subproblem(_SIMPLE_SUB1_LP, block_id="block_0")
+        sub2_lp = parse_subproblem(_SIMPLE_SUB2_LP, block_id="block_1")
+        with (
+            patch("dwsolver.lp_parser.Problem", side_effect=payload),
+            pytest.raises(DWSolverInputError, match="schema validation"),
+        ):
+            assemble_problem(master_lp, [sub1_lp, sub2_lp])
 
     # --- Full end-to-end assembly ---
 
